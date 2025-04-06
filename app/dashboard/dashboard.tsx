@@ -7,7 +7,7 @@ import { usePreloadedQueryWithAuth } from '@/lib/hooks';
 import { Preloaded, useAction } from 'convex/react';
 import { FunctionReturnType } from 'convex/server';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { PlusIcon, SearchIcon } from 'lucide-react';
 
 export default function DashboardHomePage({
@@ -19,8 +19,17 @@ export default function DashboardHomePage({
   const [searchQuery, setSearchQuery] = useState('');
   const [relevantNotes, setRelevantNotes] =
     useState<FunctionReturnType<typeof api.notes.getNotes>>();
+    
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
 
   const performMyAction = useAction(api.together.similarNotes);
+
+  // Reset to page 1 when search results change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [relevantNotes]);
 
   const handleSearch = async (e: any) => {
     e.preventDefault();
@@ -41,7 +50,24 @@ export default function DashboardHomePage({
     }
   };
 
-  const finalNotes = relevantNotes ?? allNotes;
+  const allFilteredNotes = relevantNotes ?? allNotes;
+  const totalItems = allFilteredNotes?.length || 0;
+  
+  // Calculate pagination
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = allFilteredNotes?.slice(indexOfFirstItem, indexOfLastItem) || [];
+
+  // Page change handler
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
+  // Items per page change handler
+  const handleItemsPerPageChange = (newItemsPerPage: number) => {
+    setItemsPerPage(newItemsPerPage);
+    setCurrentPage(1); // Reset to first page when changing items per page
+  };
 
   return (
     <div suppressHydrationWarning={true} className="min-h-screen w-full bg-white px-3 py-3 sm:px-5 sm:py-4">
@@ -77,8 +103,8 @@ export default function DashboardHomePage({
         
         {/* notes list */}
         <div className="rounded-md border border-gray-200">
-          {finalNotes && finalNotes.length > 0 ? (
-            finalNotes.map((item, index) => (
+          {currentItems && currentItems.length > 0 ? (
+            currentItems.map((item, index) => (
               <RecordedfileItemCard {...item} key={index} />
             ))
           ) : (
@@ -89,7 +115,13 @@ export default function DashboardHomePage({
         </div>
         
         {/* Pagination */}
-        <Pagination />
+        <Pagination 
+          totalItems={totalItems}
+          itemsPerPage={itemsPerPage}
+          currentPage={currentPage}
+          onPageChange={handlePageChange}
+          onRowsPerPageChange={handleItemsPerPageChange}
+        />
         
         {/* Record button - fixed on mobile, normal on desktop */}
         <div className="mt-4 sm:mt-6 flex justify-end">
