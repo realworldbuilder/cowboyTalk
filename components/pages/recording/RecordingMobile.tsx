@@ -64,7 +64,7 @@ export default function RecordingMobile({
     });
     
     // Build the professional email body
-    let emailBody = `Hello,\n\nPlease see the ${reportTypeDisplay} for ${currentDate} below.\n\n`;
+    let emailBody = `Howdy,\n\nPlease see the ${reportTypeDisplay} for ${currentDate} below.\n\n`;
     
     // Add directive if available (this is the main communication to recipient)
     if (directive && directive.trim()) {

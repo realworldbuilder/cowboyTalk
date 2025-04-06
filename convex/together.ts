@@ -118,7 +118,7 @@ const NoteSchema = z.object({
   qualityIssues: z
     .string()
     .optional()
-    .describe('Quality issues identified and their resolution status'),
+    .describe('Quality issues identified such as wrong materials, incorrect colors/sizes, defects, damage, or other concerns about whether materials or work meets requirements'),
     
   // Progress Report fields
   milestonesAchieved: z
@@ -216,7 +216,7 @@ The response must be formatted in **valid JSON** using this exact structure:
   // Quality Control Report fields
   "inspectionResults": "Results of quality inspections performed. Only if report type is quality_control.",
   "testResults": "Results of quality tests conducted (concrete, soil, etc.). Only if report type is quality_control.",
-  "qualityIssues": "Quality issues identified and their resolution status. Only if report type is quality_control.",
+  "qualityIssues": "Quality issues identified such as wrong materials, incorrect colors/sizes, defects, damage, or other concerns about whether materials or work meets requirements. Only if report type is quality_control.",
   
   // Progress Report fields
   "milestonesAchieved": "Project milestones achieved or progress towards them. Only if report type is progress.",
@@ -244,7 +244,7 @@ The response must be formatted in **valid JSON** using this exact structure:
 - Categorize the report as one of these types based solely on the content:
   - daily_activity: Reports tracking progress, labor, equipment, and materials used
   - safety_incident: Reports documenting accidents, near-misses, or hazards
-  - quality_control: Reports ensuring work meets standards (e.g., concrete tests, inspections)
+  - quality_control: Reports about material issues, defects, wrong specifications (color, size, type), inspections, tests, or any concerns about whether delivered materials or completed work meets required standards or expectations
   - progress: Reports updating project milestones and delays
   - initial_rfi: Reports requesting information or clarification on project details
   - change_order: Reports recording deviations from the original plan
@@ -367,7 +367,7 @@ The response must be formatted in **valid JSON** using this exact structure:
   // Quality Control Report fields
   "inspectionResults": "Results of quality inspections performed. Only if report type is quality_control.",
   "testResults": "Results of quality tests conducted (concrete, soil, etc.). Only if report type is quality_control.",
-  "qualityIssues": "Quality issues identified and their resolution status. Only if report type is quality_control.",
+  "qualityIssues": "Quality issues identified such as wrong materials, incorrect colors/sizes, defects, damage, or other concerns about whether materials or work meets requirements. Only if report type is quality_control.",
   
   // Progress Report fields
   "milestonesAchieved": "Project milestones achieved or progress towards them. Only if report type is progress.",
@@ -395,7 +395,7 @@ The response must be formatted in **valid JSON** using this exact structure:
 - Categorize the report as one of these types based solely on the content:
   - daily_activity: Reports tracking progress, labor, equipment, and materials used
   - safety_incident: Reports documenting accidents, near-misses, or hazards
-  - quality_control: Reports ensuring work meets standards (e.g., concrete tests, inspections)
+  - quality_control: Reports about material issues, defects, wrong specifications (color, size, type), inspections, tests, or any concerns about whether delivered materials or completed work meets required standards or expectations
   - progress: Reports updating project milestones and delays
   - initial_rfi: Reports requesting information or clarification on project details
   - change_order: Reports recording deviations from the original plan
