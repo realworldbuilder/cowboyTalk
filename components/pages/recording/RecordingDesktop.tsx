@@ -94,12 +94,13 @@ export default function RecordingDesktop({
     
     // Add cost impact notifications for delays or material issues
     if ((reportType === 'progress' && note.delays !== "Not mentioned") || 
-        (reportType === 'quality_control' && note.qualityIssues !== "Not mentioned")) {
-      emailBody += `NOTICE: Please be advised that delays or material issues may result in additional costs. Responsible parties will be held accountable for these costs.\n\n`;
+        (reportType === 'quality_control' && note.qualityIssues !== "Not mentioned") ||
+        (reportType === 'safety_incident')) {
+      emailBody += `NOTICE: Please be advised that delays, material issues, or safety incidents may result in additional costs. Responsible parties will be held accountable for these costs.\n\n`;
     }
     
     // Add a professional closing
-    emailBody += `\nPlease let me know if you have any questions or need additional information.\n\nBest regards,\n\n[Your Name]\n`;
+    emailBody += `Please let me know if you have any questions or need additional information.\n\nBest regards,\n[Your Name]`;
     
     // Create mailto link with subject and body
     const mailtoLink = `mailto:?subject=${encodeURIComponent(reportTypeDisplay + ': ' + (title || 'Update'))} - ${currentDate.split(',')[0]}&body=${encodeURIComponent(emailBody)}`;
