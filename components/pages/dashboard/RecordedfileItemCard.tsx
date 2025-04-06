@@ -27,8 +27,6 @@ const RecordedfileItemCard = ({
   const noteDetails = useQuery(api.notes.getNote, { id: _id }) || { note: null };
   // Get all action items (without parameters)
   const allActionItems = useQuery(api.notes.getActionItems, {}) || [];
-  // Get action items specific to this note
-  const actionItemCount = useQuery(api.notes.actionItemCountForNote, { noteId: _id });
   
   // Filter action items for this specific note
   const actionItems = allActionItems.filter((item: any) => 
