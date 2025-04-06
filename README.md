@@ -1,6 +1,6 @@
 <a href="https://tigertalk.app/">
-  <img alt="Tiger Talk – AI-powered construction reports in seconds." src="public/images/og-image.png">
-  <h1 align="center">Tiger Talk</h1>
+  <img alt="Cowboy Talk – AI-powered construction reports in seconds." src="public/images/og-image.png">
+  <h1 align="center">Cowboy Talk</h1>
 </a>
 
 <p align="center">

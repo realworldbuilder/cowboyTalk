@@ -35,15 +35,28 @@ const NoteSchema = z.object({
       'A short summary in the first person point of view of the person recording the voice message',
     )
     .max(500),
+  directive: z
+    .string()
+    .describe(
+      'A notification or directive to others who need to take action. Use clear, direct language that communicates what the recipient needs to know or do.',
+    )
+    .max(500),
   actionItems: z
     .array(z.string())
     .describe(
       'A list of action items from the voice note, short and to the point. Make sure all action item lists are fully resolved if they are nested',
     ),
-  // Construction report fields
+  // Report type classification
+  reportType: z
+    .enum(['daily_activity', 'safety_incident', 'quality_control', 'progress', 'initial_rfi', 'change_order', 'general'])
+    .describe('The category of report based on content'),
+  
+  // isConstructionReport field - we're changing the description to be more neutral
   isConstructionReport: z
     .boolean()
-    .describe('True if this appears to be a construction daily report, false otherwise'),
+    .describe('True if this appears to be any type of construction-related report, false otherwise'),
+  
+  // Original Construction report fields
   manpower: z
     .string()
     .optional()
@@ -64,6 +77,80 @@ const NoteSchema = z.object({
     .string()
     .optional()
     .describe('Information about equipment used, equipment issues, or equipment needs'),
+    
+  // Daily Activity Report fields
+  laborDetails: z
+    .string()
+    .optional()
+    .describe('Detailed information about labor hours, productivity, and crew compositions'),
+  materialsUsed: z
+    .string()
+    .optional()
+    .describe('Materials used, quantities, and delivery information'),
+    
+  // Safety Incident Report fields
+  incidentType: z
+    .string()
+    .optional()
+    .describe('Type of safety incident: accident, near-miss, or hazard'),
+  incidentDescription: z
+    .string()
+    .optional()
+    .describe('Detailed description of the incident, including location and time'),
+  peopleInvolved: z
+    .string()
+    .optional()
+    .describe('People involved in or affected by the incident'),
+  correctiveActions: z
+    .string()
+    .optional()
+    .describe('Actions taken or needed to address the safety issue'),
+    
+  // Quality Control Report fields
+  inspectionResults: z
+    .string()
+    .optional()
+    .describe('Results of quality inspections performed'),
+  testResults: z
+    .string()
+    .optional()
+    .describe('Results of quality tests conducted (concrete, soil, etc.)'),
+  qualityIssues: z
+    .string()
+    .optional()
+    .describe('Quality issues identified and their resolution status'),
+    
+  // Progress Report fields
+  milestonesAchieved: z
+    .string()
+    .optional()
+    .describe('Project milestones achieved or progress towards them'),
+  scheduledVsActual: z
+    .string()
+    .optional()
+    .describe('Comparison of scheduled progress versus actual progress'),
+  budgetImpact: z
+    .string()
+    .optional()
+    .describe('Impact on project budget or cost considerations'),
+    
+  // Initial RFI Request fields
+  rfiNumber: z
+    .string()
+    .optional()
+    .describe('RFI number or identifier for tracking purposes. Only if report type is initial_rfi.'),
+  rfiQuestion: z
+    .string()
+    .optional()
+    .describe('The specific question or information being requested. Only if report type is initial_rfi.'),
+  rfiContext: z
+    .string()
+    .optional()
+    .describe('Background information or context for the RFI request. Only if report type is initial_rfi.'),
+  requiredResponseDate: z
+    .string()
+    .optional()
+    .describe('Date by which a response to the RFI is needed. Only if report type is initial_rfi.'),
 });
 
 export const chat = internalAction({
@@ -97,36 +184,77 @@ export const chat = internalAction({
           messages: [
             {
               role: 'system',
-              content: `The following is a transcript of a voice message. Extract a title, summary, action items, and—if it appears to be a construction daily report—extract detailed construction-specific information.
+              content: `The following is a transcript of a voice message that needs to be processed to extract information.
 
 The response must be formatted in **valid JSON** using this exact structure:
 {
   "title": "Short descriptive title of what the voice message is about",
   "summary": "A short summary in the first person point of view of the person recording the voice message (maximum 500 characters)",
+  "directive": "A notification or directive to others who need to take action. Use clear, direct language that communicates what the recipient needs to know or do. (maximum 500 characters)",
   "actionItems": ["Action item 1", "Action item 2", ...],
+  "reportType": "daily_activity", "safety_incident", "quality_control", "progress", "initial_rfi", "change_order", or "general",
   "isConstructionReport": boolean (true/false),
-  "manpower": "Information about workers, staffing, trades, or labor hours. Include subcontractor names and headcounts if possible. Use 'Not mentioned' if not provided.",
-  "weather": "Weather conditions that may affect work (temperature, wind, rain, etc.). Use 'Not mentioned' if not provided.",
-  "delays": "Delays or schedule disruptions, including cause, impact, or duration. Use 'Not mentioned' if not provided.",
-  "openIssues": "Unresolved problems, punch list items, safety concerns, coordination issues, or inspection results. Use 'Not mentioned' if not provided.",
-  "equipment": "Information about major equipment used, deliveries, damaged tools, or machinery downtime. Use 'Not mentioned' if not provided."
+  
+  // Original construction report fields (for backward compatibility)
+  "manpower": "Information about workers, staffing, trades, or labor hours. Use 'Not mentioned' if not provided.",
+  "weather": "Weather conditions that may affect work. Use 'Not mentioned' if not provided.",
+  "delays": "Delays or schedule disruptions. Use 'Not mentioned' if not provided.",
+  "openIssues": "Unresolved problems or issues. Use 'Not mentioned' if not provided.",
+  "equipment": "Information about major equipment used. Use 'Not mentioned' if not provided.",
+  
+  // Fields for specific report types - only include relevant ones based on report type
+  // Daily Activity Report fields
+  "laborDetails": "Detailed information about labor hours, productivity, and crew compositions. Only if report type is daily_activity.",
+  "materialsUsed": "Materials used, quantities, and delivery information. Only if report type is daily_activity.",
+  
+  // Safety Incident Report fields
+  "incidentType": "Type of safety incident: accident, near-miss, or hazard. Only if report type is safety_incident.",
+  "incidentDescription": "Detailed description of the incident, including location and time. Only if report type is safety_incident.",
+  "peopleInvolved": "People involved in or affected by the incident. Only if report type is safety_incident.",
+  "correctiveActions": "Actions taken or needed to address the safety issue. Only if report type is safety_incident.",
+  
+  // Quality Control Report fields
+  "inspectionResults": "Results of quality inspections performed. Only if report type is quality_control.",
+  "testResults": "Results of quality tests conducted (concrete, soil, etc.). Only if report type is quality_control.",
+  "qualityIssues": "Quality issues identified and their resolution status. Only if report type is quality_control.",
+  
+  // Progress Report fields
+  "milestonesAchieved": "Project milestones achieved or progress towards them. Only if report type is progress.",
+  "scheduledVsActual": "Comparison of scheduled progress versus actual progress. Only if report type is progress.",
+  "budgetImpact": "Impact on project budget or cost considerations. Only if report type is progress.",
+  
+  // Initial RFI Request fields
+  "rfiNumber": "RFI number or identifier for tracking purposes. Only if report type is initial_rfi.",
+  "rfiQuestion": "The specific question or information being requested. Only if report type is initial_rfi.",
+  "rfiContext": "Background information or context for the RFI request. Only if report type is initial_rfi.",
+  "requiredResponseDate": "Date by which a response to the RFI is needed. Only if report type is initial_rfi.",
+  
+  // Change Order Report fields
+  "changeDescription": "Description of the change from original plans. Only if report type is change_order.",
+  "reasonForChange": "Reason or justification for the change. Only if report type is change_order.",
+  "costImpact": "Impact on project costs due to the change. Only if report type is change_order.",
+  "scheduleImpact": "Impact on project schedule due to the change. Only if report type is change_order."
 }
 
 **Guidelines:**
-- If the voice message is NOT a construction report, only include: title, summary, actionItems, and set isConstructionReport to false.
-- If it IS a construction report, include all fields and set isConstructionReport to true.
-- Use "Not mentioned" (exact string) for any construction fields that are missing.
+- Write the summary as a factual overview in the first person point of view, as if the speaker is summarizing what they said
+- For the directive, write it as a message to others who need to take action, using direct language focused on what they need to know or do
+- For the directive, frame it from the perspective of the sender communicating to the recipient(s)
+- Analyze the content objectively to determine the most accurate report type
+- Categorize the report as one of these types based solely on the content:
+  - daily_activity: Reports tracking progress, labor, equipment, and materials used
+  - safety_incident: Reports documenting accidents, near-misses, or hazards
+  - quality_control: Reports ensuring work meets standards (e.g., concrete tests, inspections)
+  - progress: Reports updating project milestones and delays
+  - initial_rfi: Reports requesting information or clarification on project details
+  - change_order: Reports recording deviations from the original plan
+  - general: Any other report that doesn't fit these categories
+- Set isConstructionReport to true only if the content is clearly related to construction activities
+- Treat all report types equally without prioritizing daily construction reports
+- Use "Not mentioned" (exact string) for any fields that aren't relevant to the report type or aren't mentioned.
 - Do not include markdown, headings, or explanations. Only return valid JSON.
-- Listen for details common to high-quality daily construction reports, such as:
-  - Who was on-site (trades, subcontractors, consultants)
-  - What work was completed or in progress (tasks, locations, % completion)
-  - Site conditions (weather or safety)
-  - Material/equipment deliveries or shortages
-  - Inspections or coordination meetings
-  - Any impact to budget, schedule, or safety
-  - Action plan or next steps (if provided)
 
-The goal is to produce an output that reflects a clear, accurate snapshot of the jobsite, suitable for official project documentation and review.`
+The goal is to create both a factual summary and an actionable directive while accurately classifying the report type based solely on the content.`
             },
             { role: 'user', content: finalTranscript }
           ],
@@ -154,14 +282,43 @@ The goal is to produce an output that reflects a clear, accurate snapshot of the
           await ctx.runMutation(internal.together.saveSummary, {
             id: args.id,
             summary: extractedData.summary,
+            directive: extractedData.directive || "",
             actionItems: extractedData.actionItems,
             title: extractedData.title,
+            reportType: extractedData.reportType || "general",
             isConstructionReport: extractedData.isConstructionReport || false,
+            // Original construction report fields
             manpower: extractedData.manpower || "Not mentioned",
             weather: extractedData.weather || "Not mentioned",
             delays: extractedData.delays || "Not mentioned",
             openIssues: extractedData.openIssues || "Not mentioned",
             equipment: extractedData.equipment || "Not mentioned",
+            // Daily Activity Report fields
+            laborDetails: extractedData.laborDetails || "Not mentioned",
+            materialsUsed: extractedData.materialsUsed || "Not mentioned",
+            // Safety Incident Report fields
+            incidentType: extractedData.incidentType || "Not mentioned",
+            incidentDescription: extractedData.incidentDescription || "Not mentioned",
+            peopleInvolved: extractedData.peopleInvolved || "Not mentioned",
+            correctiveActions: extractedData.correctiveActions || "Not mentioned",
+            // Quality Control Report fields
+            inspectionResults: extractedData.inspectionResults || "Not mentioned",
+            testResults: extractedData.testResults || "Not mentioned",
+            qualityIssues: extractedData.qualityIssues || "Not mentioned",
+            // Progress Report fields
+            milestonesAchieved: extractedData.milestonesAchieved || "Not mentioned",
+            scheduledVsActual: extractedData.scheduledVsActual || "Not mentioned",
+            budgetImpact: extractedData.budgetImpact || "Not mentioned",
+            // Initial RFI Request fields
+            rfiNumber: extractedData.rfiNumber || "Not mentioned",
+            rfiQuestion: extractedData.rfiQuestion || "Not mentioned",
+            rfiContext: extractedData.rfiContext || "Not mentioned",
+            requiredResponseDate: extractedData.requiredResponseDate || "Not mentioned",
+            // Change Order Report fields
+            changeDescription: extractedData.changeDescription || "Not mentioned",
+            reasonForChange: extractedData.reasonForChange || "Not mentioned",
+            costImpact: extractedData.costImpact || "Not mentioned",
+            scheduleImpact: extractedData.scheduleImpact || "Not mentioned",
           });
           
           return; // Exit if successful
@@ -178,36 +335,77 @@ The goal is to produce an output that reflects a clear, accurate snapshot of the
           messages: [
             {
               role: 'system',
-              content: `The following is a transcript of a voice message. Extract a title, summary, action items, and—if it appears to be a construction daily report—extract detailed construction-specific information.
+              content: `The following is a transcript of a voice message that needs to be processed to extract information.
 
 The response must be formatted in **valid JSON** using this exact structure:
 {
   "title": "Short descriptive title of what the voice message is about",
   "summary": "A short summary in the first person point of view of the person recording the voice message (maximum 500 characters)",
+  "directive": "A notification or directive to others who need to take action. Use clear, direct language that communicates what the recipient needs to know or do. (maximum 500 characters)",
   "actionItems": ["Action item 1", "Action item 2", ...],
+  "reportType": "daily_activity", "safety_incident", "quality_control", "progress", "initial_rfi", "change_order", or "general",
   "isConstructionReport": boolean (true/false),
-  "manpower": "Information about workers, staffing, trades, or labor hours. Include subcontractor names and headcounts if possible. Use 'Not mentioned' if not provided.",
-  "weather": "Weather conditions that may affect work (temperature, wind, rain, etc.). Use 'Not mentioned' if not provided.",
-  "delays": "Delays or schedule disruptions, including cause, impact, or duration. Use 'Not mentioned' if not provided.",
-  "openIssues": "Unresolved problems, punch list items, safety concerns, coordination issues, or inspection results. Use 'Not mentioned' if not provided.",
-  "equipment": "Information about major equipment used, deliveries, damaged tools, or machinery downtime. Use 'Not mentioned' if not provided."
+  
+  // Original construction report fields (for backward compatibility)
+  "manpower": "Information about workers, staffing, trades, or labor hours. Use 'Not mentioned' if not provided.",
+  "weather": "Weather conditions that may affect work. Use 'Not mentioned' if not provided.",
+  "delays": "Delays or schedule disruptions. Use 'Not mentioned' if not provided.",
+  "openIssues": "Unresolved problems or issues. Use 'Not mentioned' if not provided.",
+  "equipment": "Information about major equipment used. Use 'Not mentioned' if not provided.",
+  
+  // Fields for specific report types - only include relevant ones based on report type
+  // Daily Activity Report fields
+  "laborDetails": "Detailed information about labor hours, productivity, and crew compositions. Only if report type is daily_activity.",
+  "materialsUsed": "Materials used, quantities, and delivery information. Only if report type is daily_activity.",
+  
+  // Safety Incident Report fields
+  "incidentType": "Type of safety incident: accident, near-miss, or hazard. Only if report type is safety_incident.",
+  "incidentDescription": "Detailed description of the incident, including location and time. Only if report type is safety_incident.",
+  "peopleInvolved": "People involved in or affected by the incident. Only if report type is safety_incident.",
+  "correctiveActions": "Actions taken or needed to address the safety issue. Only if report type is safety_incident.",
+  
+  // Quality Control Report fields
+  "inspectionResults": "Results of quality inspections performed. Only if report type is quality_control.",
+  "testResults": "Results of quality tests conducted (concrete, soil, etc.). Only if report type is quality_control.",
+  "qualityIssues": "Quality issues identified and their resolution status. Only if report type is quality_control.",
+  
+  // Progress Report fields
+  "milestonesAchieved": "Project milestones achieved or progress towards them. Only if report type is progress.",
+  "scheduledVsActual": "Comparison of scheduled progress versus actual progress. Only if report type is progress.",
+  "budgetImpact": "Impact on project budget or cost considerations. Only if report type is progress.",
+  
+  // Initial RFI Request fields
+  "rfiNumber": "RFI number or identifier for tracking purposes. Only if report type is initial_rfi.",
+  "rfiQuestion": "The specific question or information being requested. Only if report type is initial_rfi.",
+  "rfiContext": "Background information or context for the RFI request. Only if report type is initial_rfi.",
+  "requiredResponseDate": "Date by which a response to the RFI is needed. Only if report type is initial_rfi.",
+  
+  // Change Order Report fields
+  "changeDescription": "Description of the change from original plans. Only if report type is change_order.",
+  "reasonForChange": "Reason or justification for the change. Only if report type is change_order.",
+  "costImpact": "Impact on project costs due to the change. Only if report type is change_order.",
+  "scheduleImpact": "Impact on project schedule due to the change. Only if report type is change_order."
 }
 
 **Guidelines:**
-- If the voice message is NOT a construction report, only include: title, summary, actionItems, and set isConstructionReport to false.
-- If it IS a construction report, include all fields and set isConstructionReport to true.
-- Use "Not mentioned" (exact string) for any construction fields that are missing.
+- Write the summary as a factual overview in the first person point of view, as if the speaker is summarizing what they said
+- For the directive, write it as a message to others who need to take action, using direct language focused on what they need to know or do
+- For the directive, frame it from the perspective of the sender communicating to the recipient(s)
+- Analyze the content objectively to determine the most accurate report type
+- Categorize the report as one of these types based solely on the content:
+  - daily_activity: Reports tracking progress, labor, equipment, and materials used
+  - safety_incident: Reports documenting accidents, near-misses, or hazards
+  - quality_control: Reports ensuring work meets standards (e.g., concrete tests, inspections)
+  - progress: Reports updating project milestones and delays
+  - initial_rfi: Reports requesting information or clarification on project details
+  - change_order: Reports recording deviations from the original plan
+  - general: Any other report that doesn't fit these categories
+- Set isConstructionReport to true only if the content is clearly related to construction activities
+- Treat all report types equally without prioritizing daily construction reports
+- Use "Not mentioned" (exact string) for any fields that aren't relevant to the report type or aren't mentioned.
 - Do not include markdown, headings, or explanations. Only return valid JSON.
-- Listen for details common to high-quality daily construction reports, such as:
-  - Who was on-site (trades, subcontractors, consultants)
-  - What work was completed or in progress (tasks, locations, % completion)
-  - Site conditions (weather or safety)
-  - Material/equipment deliveries or shortages
-  - Inspections or coordination meetings
-  - Any impact to budget, schedule, or safety
-  - Action plan or next steps (if provided)
 
-The goal is to produce an output that reflects a clear, accurate snapshot of the jobsite, suitable for official project documentation and review.`
+The goal is to create both a factual summary and an actionable directive while accurately classifying the report type based solely on the content.`
             },
             { role: 'user', content: finalTranscript }
           ],
@@ -238,14 +436,43 @@ The goal is to produce an output that reflects a clear, accurate snapshot of the
         await ctx.runMutation(internal.together.saveSummary, {
           id: args.id,
           summary: extractedData.summary,
+          directive: extractedData.directive || "",
           actionItems: extractedData.actionItems,
           title: extractedData.title,
+          reportType: extractedData.reportType || "general",
           isConstructionReport: extractedData.isConstructionReport || false,
+          // Original construction report fields
           manpower: extractedData.manpower || "Not mentioned",
           weather: extractedData.weather || "Not mentioned",
           delays: extractedData.delays || "Not mentioned",
           openIssues: extractedData.openIssues || "Not mentioned",
           equipment: extractedData.equipment || "Not mentioned",
+          // Daily Activity Report fields
+          laborDetails: extractedData.laborDetails || "Not mentioned",
+          materialsUsed: extractedData.materialsUsed || "Not mentioned",
+          // Safety Incident Report fields
+          incidentType: extractedData.incidentType || "Not mentioned",
+          incidentDescription: extractedData.incidentDescription || "Not mentioned",
+          peopleInvolved: extractedData.peopleInvolved || "Not mentioned",
+          correctiveActions: extractedData.correctiveActions || "Not mentioned",
+          // Quality Control Report fields
+          inspectionResults: extractedData.inspectionResults || "Not mentioned",
+          testResults: extractedData.testResults || "Not mentioned",
+          qualityIssues: extractedData.qualityIssues || "Not mentioned",
+          // Progress Report fields
+          milestonesAchieved: extractedData.milestonesAchieved || "Not mentioned",
+          scheduledVsActual: extractedData.scheduledVsActual || "Not mentioned",
+          budgetImpact: extractedData.budgetImpact || "Not mentioned",
+          // Initial RFI Request fields
+          rfiNumber: extractedData.rfiNumber || "Not mentioned",
+          rfiQuestion: extractedData.rfiQuestion || "Not mentioned",
+          rfiContext: extractedData.rfiContext || "Not mentioned",
+          requiredResponseDate: extractedData.requiredResponseDate || "Not mentioned",
+          // Change Order Report fields
+          changeDescription: extractedData.changeDescription || "Not mentioned",
+          reasonForChange: extractedData.reasonForChange || "Not mentioned",
+          costImpact: extractedData.costImpact || "Not mentioned",
+          scheduleImpact: extractedData.scheduleImpact || "Not mentioned",
         });
       }
     } catch (e: any) {
@@ -253,14 +480,38 @@ The goal is to produce an output that reflects a clear, accurate snapshot of the
       await ctx.runMutation(internal.together.saveSummary, {
         id: args.id,
         summary: 'Summary failed to generate. Please try again or contact support if this persists.',
+        directive: '',
         actionItems: [],
         title: 'Voice Note ' + new Date().toLocaleDateString(),
+        reportType: "general",
         isConstructionReport: false,
+        // Original construction report fields
         manpower: "Not mentioned",
         weather: "Not mentioned",
         delays: "Not mentioned",
         openIssues: "Not mentioned",
         equipment: "Not mentioned",
+        // Default values for all specialized report fields
+        laborDetails: "Not mentioned",
+        materialsUsed: "Not mentioned",
+        incidentType: "Not mentioned",
+        incidentDescription: "Not mentioned",
+        peopleInvolved: "Not mentioned",
+        correctiveActions: "Not mentioned",
+        inspectionResults: "Not mentioned",
+        testResults: "Not mentioned",
+        qualityIssues: "Not mentioned",
+        milestonesAchieved: "Not mentioned",
+        scheduledVsActual: "Not mentioned",
+        budgetImpact: "Not mentioned",
+        rfiNumber: "Not mentioned",
+        rfiQuestion: "Not mentioned",
+        rfiContext: "Not mentioned",
+        requiredResponseDate: "Not mentioned",
+        changeDescription: "Not mentioned",
+        reasonForChange: "Not mentioned",
+        costImpact: "Not mentioned",
+        scheduleImpact: "Not mentioned",
       });
     }
   },
@@ -281,27 +532,95 @@ export const saveSummary = internalMutation({
   args: {
     id: v.id('notes'),
     summary: v.string(),
+    directive: v.string(),
     title: v.string(),
     actionItems: v.array(v.string()),
+    reportType: v.string(),
     isConstructionReport: v.boolean(),
+    // Original construction report fields
     manpower: v.string(),
     weather: v.string(),
     delays: v.string(),
     openIssues: v.string(),
     equipment: v.string(),
+    // Daily Activity Report fields
+    laborDetails: v.optional(v.string()),
+    materialsUsed: v.optional(v.string()),
+    // Safety Incident Report fields
+    incidentType: v.optional(v.string()),
+    incidentDescription: v.optional(v.string()),
+    peopleInvolved: v.optional(v.string()),
+    correctiveActions: v.optional(v.string()),
+    // Quality Control Report fields
+    inspectionResults: v.optional(v.string()),
+    testResults: v.optional(v.string()),
+    qualityIssues: v.optional(v.string()),
+    // Progress Report fields
+    milestonesAchieved: v.optional(v.string()),
+    scheduledVsActual: v.optional(v.string()),
+    budgetImpact: v.optional(v.string()),
+    // Initial RFI Request fields
+    rfiNumber: v.optional(v.string()),
+    rfiQuestion: v.optional(v.string()),
+    rfiContext: v.optional(v.string()),
+    requiredResponseDate: v.optional(v.string()),
+    // Change Order Report fields
+    changeDescription: v.optional(v.string()),
+    reasonForChange: v.optional(v.string()),
+    costImpact: v.optional(v.string()),
+    scheduleImpact: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const { id, summary, actionItems, title, isConstructionReport, manpower, weather, delays, openIssues, equipment } = args;
+    const { 
+      id, summary, directive, actionItems, title, reportType, isConstructionReport, 
+      manpower, weather, delays, openIssues, equipment,
+      laborDetails, materialsUsed,
+      incidentType, incidentDescription, peopleInvolved, correctiveActions,
+      inspectionResults, testResults, qualityIssues,
+      milestonesAchieved, scheduledVsActual, budgetImpact,
+      rfiNumber, rfiQuestion, rfiContext, requiredResponseDate,
+      changeDescription, reasonForChange, costImpact, scheduleImpact
+    } = args;
+    
     await ctx.db.patch(id, {
       summary: summary,
+      directive: directive,
       title: title,
       generatingTitle: false,
+      reportType: reportType,
       isConstructionReport: isConstructionReport,
+      // Original construction report fields
       manpower: manpower,
       weather: weather,
       delays: delays,
       openIssues: openIssues,
       equipment: equipment,
+      // Daily Activity Report fields
+      laborDetails: laborDetails,
+      materialsUsed: materialsUsed,
+      // Safety Incident Report fields
+      incidentType: incidentType,
+      incidentDescription: incidentDescription,
+      peopleInvolved: peopleInvolved,
+      correctiveActions: correctiveActions,
+      // Quality Control Report fields
+      inspectionResults: inspectionResults,
+      testResults: testResults,
+      qualityIssues: qualityIssues,
+      // Progress Report fields
+      milestonesAchieved: milestonesAchieved,
+      scheduledVsActual: scheduledVsActual,
+      budgetImpact: budgetImpact,
+      // Initial RFI Request fields
+      rfiNumber: rfiNumber,
+      rfiQuestion: rfiQuestion,
+      rfiContext: rfiContext,
+      requiredResponseDate: requiredResponseDate,
+      // Change Order Report fields
+      changeDescription: changeDescription,
+      reasonForChange: reasonForChange,
+      costImpact: costImpact,
+      scheduleImpact: scheduleImpact,
     });
 
     let note = await ctx.db.get(id);

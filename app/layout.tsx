@@ -1,15 +1,16 @@
-import type { Metadata } from 'next';
+import { Inter } from 'next/font/google';
 import './globals.css';
+import { Metadata } from 'next';
 import ConvexClientProvider from './ConvexClientProvider';
+import { ClerkProvider } from '@clerk/nextjs';
 import Footer from '@/components/ui/Footer';
 import { Toaster } from 'react-hot-toast';
-import PlausibleProvider from 'next-plausible';
 
-let title = 'Tiger Talk - AI-Powered Daily Construction Reports';
-let description = 'Generate construction reports and actionable tasks from your voice notes';
-let url = 'https://tigertalk.app';
-let ogimage = 'https://tigertalk.app/images/og-image.png';
-let sitename = 'tigertalk.app';
+let title = 'Cowboy Talk - AI-Powered Construction Reports';
+let description = 'Turn your voice notes into detailed construction reports—no typing needed';
+let url = 'http://localhost:3000';
+let ogimage = 'http://localhost:3000/images/og-image.png';
+let sitename = 'cowboytalk';
 
 export const metadata: Metadata = {
   metadataBase: new URL(url),
@@ -43,7 +44,8 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <PlausibleProvider domain="tigertalk.app" />
+        {/* Remove the PlausibleProvider line (line 45) */}
+        {/* <PlausibleProvider domain="cowboytalk.app" /> */}
       </head>
       <body>
         <ConvexClientProvider>

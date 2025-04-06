@@ -7,8 +7,8 @@ export default async function Header() {
   const user = await currentUser();
   
   // Clerk Account Portal URLs
-  const signInUrl = "https://accounts.tigertalk.app/sign-in?redirect_url=https://www.tigertalk.app/dashboard";
-  const signUpUrl = "https://accounts.tigertalk.app/sign-up?redirect_url=https://www.tigertalk.app/dashboard";
+  const signInUrl = "/sign-in";
+  const signUpUrl = "/sign-up";
   
   return (
     <div className="relative border-b border-gray-200 px-3 py-3 sm:px-4 sm:py-4 md:px-10">
@@ -17,7 +17,7 @@ export default async function Header() {
         <Link className="flex w-fit items-center gap-1 sm:gap-[2px]" href="/dashboard">
           <div className="relative h-5 w-5 md:h-8 md:w-8">
             <Image
-              src="/logo.svg"
+              src="/logo.png"
               alt="logo"
               fill
               sizes="(max-width: 768px) 20px, 32px"
@@ -26,7 +26,7 @@ export default async function Header() {
             />
           </div>
           <h1 className="text-base font-medium text-[#25292F] sm:text-lg md:text-xl lg:text-2xl">
-            Tiger Talk
+            Cowboy Talk
           </h1>
         </Link>
         {/* navigation */}

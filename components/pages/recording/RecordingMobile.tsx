@@ -14,7 +14,7 @@ export default function RecordingMobile({
   note: Doc<'notes'>;
   actionItems: Doc<'actionItems'>[];
 }) {
-  const { transcription, title, _creationTime, isConstructionReport, summary, manpower, weather, delays, openIssues, equipment } = note;
+  const { transcription, title, _creationTime, isConstructionReport, summary, directive, manpower, weather, delays, openIssues, equipment } = note;
   const [transcriptOpen, setTranscriptOpen] = useState<boolean>(true);
   const [reportOpen, setReportOpen] = useState<boolean>(false);
   const [actionItemOpen, setActionItemOpen] = useState<boolean>(false);
@@ -33,39 +33,114 @@ export default function RecordingMobile({
     // Build the report content
     let emailBody = `${title}\n\n`;
     
+    // Get report type display name for email subject
+    let reportTypeDisplay = '';
+    switch (note.reportType) {
+      case 'daily_activity':
+        reportTypeDisplay = 'Daily Activity Report';
+        break;
+      case 'safety_incident':
+        reportTypeDisplay = 'Safety Incident Report';
+        break;
+      case 'quality_control':
+        reportTypeDisplay = 'Quality Control Report';
+        break;
+      case 'progress':
+        reportTypeDisplay = 'Progress Report';
+        break;
+      case 'change_order':
+        reportTypeDisplay = 'Change Order Report';
+        break;
+      case 'initial_rfi':
+        reportTypeDisplay = 'Initial RFI Request';
+        break;
+      default:
+        reportTypeDisplay = 'General Report';
+    }
+    
+    // Add a clear notification section at the top
+    emailBody += `NOTIFICATION: ${reportTypeDisplay}\n`;
+    emailBody += `DATE: ${new Date().toLocaleDateString()}\n\n`;
+    
     if (summary) {
       emailBody += `SUMMARY:\n${summary}\n\n`;
     }
     
-    // Add construction report details if available
-    if (isConstructionReport) {
-      if (manpower && manpower !== "Not mentioned") {
-        emailBody += `MANPOWER:\n${manpower}\n\n`;
-      }
-      
-      if (weather && weather !== "Not mentioned") {
-        emailBody += `WEATHER:\n${weather}\n\n`;
-      }
-      
-      if (delays && delays !== "Not mentioned") {
-        emailBody += `DELAYS:\n${delays}\n\n`;
-      }
-      
-      if (openIssues && openIssues !== "Not mentioned") {
-        emailBody += `OPEN ISSUES:\n${openIssues}\n\n`;
-      }
-      
-      if (equipment && equipment !== "Not mentioned") {
-        emailBody += `EQUIPMENT:\n${equipment}\n\n`;
-      }
+    if (directive && directive.trim()) {
+      emailBody += `DIRECTIVE:\n${directive}\n\n`;
     }
     
+    // Highlight action items next for better visibility
     if (actionItems.length > 0) {
-      emailBody += `ACTION ITEMS:\n${actionItemsText}\n\n`;
+      emailBody += `REQUIRED ACTIONS:\n${actionItemsText}\n\n`;
     }
+    
+    // Add report type specific details if available
+    const reportType = note.reportType || 'general';
+    
+    // Helper function to add a field if it exists and is not "Not mentioned"
+    const addField = (label: string, value?: string) => {
+      if (value && value !== "Not mentioned") {
+        emailBody += `${label}:\n${value}\n\n`;
+      }
+    };
+    
+    emailBody += `ADDITIONAL DETAILS:\n`;
+    
+    // Original construction report fields
+    if (note.isConstructionReport) {
+      addField("Manpower", note.manpower);
+      addField("Weather", note.weather);
+      addField("Delays", note.delays);
+      addField("Open Issues", note.openIssues);
+      addField("Equipment", note.equipment);
+    }
+    
+    // Add fields based on report type
+    switch (reportType) {
+      case 'daily_activity':
+        addField("Labor Details", note.laborDetails);
+        addField("Materials Used", note.materialsUsed);
+        break;
+      
+      case 'safety_incident':
+        addField("Incident Type", note.incidentType);
+        addField("Incident Description", note.incidentDescription);
+        addField("People Involved", note.peopleInvolved);
+        addField("Corrective Actions", note.correctiveActions);
+        break;
+      
+      case 'quality_control':
+        addField("Inspection Results", note.inspectionResults);
+        addField("Test Results", note.testResults);
+        addField("Quality Issues", note.qualityIssues);
+        break;
+      
+      case 'progress':
+        addField("Milestones Achieved", note.milestonesAchieved);
+        addField("Scheduled vs Actual", note.scheduledVsActual);
+        addField("Budget Impact", note.budgetImpact);
+        break;
+      
+      case 'change_order':
+        addField("Change Description", note.changeDescription);
+        addField("Reason for Change", note.reasonForChange);
+        addField("Cost Impact", note.costImpact);
+        addField("Schedule Impact", note.scheduleImpact);
+        break;
+
+      case 'initial_rfi':
+        addField("RFI Number", note.rfiNumber);
+        addField("RFI Question", note.rfiQuestion);
+        addField("RFI Context", note.rfiContext);
+        addField("Required Response Date", note.requiredResponseDate);
+        break;
+    }
+    
+    emailBody += `\nThis notification was sent via Cowboy Talk.`;
     
     // Create mailto link with subject and body
-    const mailtoLink = `mailto:?subject=${encodeURIComponent(title || 'Construction Report')}&body=${encodeURIComponent(emailBody)}`;
+    const mailtoLink = `mailto:?subject=${encodeURIComponent(reportTypeDisplay + ': ' + (title || 'Action Required'))}&body=${encodeURIComponent(emailBody)}`;
     
     // Open the email client
     window.open(mailtoLink, '_blank');
@@ -79,7 +154,7 @@ export default function RecordingMobile({
         </h1>
         <button 
           onClick={shareViaEmail}
-          className="flex items-center justify-center rounded-full bg-orange-500 p-2 text-white"
+          className="flex items-center justify-center rounded-full bg-primary p-2 text-white"
           aria-label="Share via email"
         >
           <Mail className="h-5 w-5" />
@@ -134,7 +209,6 @@ export default function RecordingMobile({
         )}
         {actionItemOpen && (
           <div className="relative min-h-[70vh] w-full px-4 py-3">
-            {' '}
             <div className="relative mx-auto mt-[27px] w-full max-w-[900px] px-5 md:mt-[45px]">
               {actionItems?.map((item: any, idx: number) => (
                 <div
@@ -149,7 +223,7 @@ export default function RecordingMobile({
                             removeActionItem(item._id);
                             toast.success('1 task completed.');
                           }}
-                          className="mr-3 h-5 w-5 flex items-center justify-center rounded-full border-2 border-orange-400 text-orange-400 hover:bg-orange-400 hover:text-white transition-colors"
+                          className="mr-3 h-5 w-5 flex items-center justify-center rounded-full border-2 border-primary-400 text-primary-400 hover:bg-primary hover:text-white transition-colors"
                         >
                           <XCircle className="h-4 w-4" />
                         </button>
@@ -166,7 +240,7 @@ export default function RecordingMobile({
               ))}
               <div className="mt-10 flex items-center justify-center">
                 <Link
-                  className="rounded-[7px] bg-orange-500 px-5 py-3 text-sm sm:text-base leading-[79%] tracking-[-0.75px] text-white"
+                  className="rounded-[7px] bg-primary px-5 py-3 text-sm sm:text-base leading-[79%] tracking-[-0.75px] text-white"
                   style={{
                     boxShadow: ' 0px 4px 4px 0px rgba(0, 0, 0, 0.15)',
                   }}
@@ -175,7 +249,7 @@ export default function RecordingMobile({
                   View All Action Items
                 </Link>
               </div>
-            </div>{' '}
+            </div>
           </div>
         )}
         <Toaster position="bottom-left" reverseOrder={false} />

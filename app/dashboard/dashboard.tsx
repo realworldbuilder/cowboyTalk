@@ -104,7 +104,7 @@ export default function DashboardHomePage({
         {/* Fixed bottom button for mobile */}
         <div className="fixed bottom-4 right-4 sm:hidden">
           <Link
-            className="flex items-center justify-center rounded-full bg-orange-500 p-3 shadow-lg"
+            className="flex items-center justify-center rounded-full bg-primary p-3 shadow-lg"
             href="/record"
             aria-label="Record a new note"
           >

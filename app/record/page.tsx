@@ -118,7 +118,7 @@ const RecordVoicePage = () => {
         >
           <div
             className="h-full w-full rounded-[50%]"
-            style={{ background: 'linear-gradient(#F56600, #993B00)' }}
+            style={{ background: 'linear-gradient(#B94700, #7A2E00)' }}
           />
         </div>
         <div className="z-50 flex h-fit w-fit flex-col items-center justify-center">

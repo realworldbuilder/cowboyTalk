@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { ArrowRight } from 'lucide-react';
 
 const Banner = () => {
@@ -15,19 +16,11 @@ const Banner = () => {
           <span className="font-bold">Convex</span>
         </a>
         <h1 className="inline-block text-center text-3xl font-medium tracking-tighter text-dark sm:text-4xl lg:text-7xl">
-          AI-Powered Daily <br className="sm:hidden lg:inline-block" />
-          Construction Reports
+          AI-Powered Construction Reports
         </h1>
         <p className="mt-4 text-center text-base font-light tracking-tight sm:mt-6 sm:text-xl lg:mt-8 lg:text-3xl">
-          Tiger Talk transforms your voice notes into{' '}
-          <span className="font-bold">
-            rich, detailed <br className="hidden lg:inline-block" />
-            reports
-          </span>{' '}
-          and <span className="font-bold">clear, actionable tasks</span> using AI.
-        </p>
-        <p className="mt-2 text-center text-sm font-medium text-gray-700 sm:text-base lg:text-xl">
-          A new way to get sh*t done. Easier than beating the Gamecocks.
+          Cowboy Talk turns your voice notes into detailed reports—daily logs, safety, quality, 
+          equipment, change orders, and more—No typing. No whining. Reports done before high noon, partner.
         </p>
         <Link
           href={'/dashboard'}
@@ -61,7 +54,7 @@ function BackgroundGradient() {
       style={{
         opacity: '0.4',
         background:
-          'radial-gradient(54.14% 54.14% at 50% 50%, #F56600 0%, rgba(245, 102, 0, 0.02) 100%)',
+          'radial-gradient(54.14% 54.14% at 50% 50%, #B94700 0%, rgba(185, 71, 0, 0.02) 100%)',
         filter: 'blur(177px)',
       }}
     />

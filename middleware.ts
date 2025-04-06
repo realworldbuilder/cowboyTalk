@@ -12,17 +12,9 @@ export default authMiddleware({
     '/favicon.ico',          // Favicon
     '/images(.*)',           // Public images
     '/_next/(.*)',           // Next.js assets
+    '/sign-in(.*)',          // Clerk sign-in
+    '/sign-up(.*)',          // Clerk sign-up
   ],
-  
-  // Handle redirects for unauthenticated users
-  afterAuth(auth, req) {
-    // If the user is not signed in and the route is not public, redirect to Clerk's hosted sign-in
-    if (!auth.userId && !auth.isPublicRoute) {
-      const signInUrl = new URL('https://accounts.tigertalk.app/sign-in');
-      signInUrl.searchParams.set('redirect_url', req.url);
-      return NextResponse.redirect(signInUrl);
-    }
-  },
 });
 
 export const config = {

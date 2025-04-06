@@ -32,7 +32,7 @@ img[src$=".svg"] {
 }
 
 .primary-gradient {
-  background: linear-gradient(90deg, #fe7e0c 0%, #f56600 100%);
+  background: linear-gradient(90deg, #B94700 0%, #7A2E00 100%);
 }
 
 .primary-shadow {
@@ -40,7 +40,7 @@ img[src$=".svg"] {
 }
 
 .progress-bar {
-  background-image: url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' stroke='%23F56600FF' stroke-width='3' stroke-dasharray='6%2c 14' stroke-dashoffset='0' stroke-linecap='butt'/%3e%3c/svg%3e");
+  background-image: url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' stroke='%23B94700FF' stroke-width='3' stroke-dasharray='6%2c 14' stroke-dashoffset='0' stroke-linecap='butt'/%3e%3c/svg%3e");
 }
 
 .custom-nav-shadow {
@@ -50,8 +50,8 @@ img[src$=".svg"] {
 .recording-box {
   background: linear-gradient(
     143deg,
-    #F56600 8.37%,
-    rgba(245, 102, 0, 0.62) 71.62%
+    #B94700 8.37%,
+    rgba(185, 71, 0, 0.62) 71.62%
   );
   filter: blur(13.100000381469727px);
 }
@@ -63,7 +63,7 @@ img[src$=".svg"] {
 }
 
 .action-btn-active {
-  background-color: #fe7e0c;
+  background-color: #B94700;
   border-radius: 0px;
   color: white;
   box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.15);
