@@ -115,17 +115,6 @@ const RecordedfileItemCard = ({
       className="flex items-center justify-between border-b border-gray-200 px-2 py-2 sm:px-4 sm:py-3 hover:bg-gray-50"
     >
       <div className="flex items-center space-x-2 sm:space-x-3 overflow-hidden">
-        <button
-          onClick={(e) => shareViaEmail(e)}
-          className="flex h-6 w-6 sm:h-8 sm:w-8 items-center justify-center rounded-full text-gray-400 hover:bg-blue-100 hover:text-blue-600"
-          aria-label="Share via email"
-        >
-          <Mail 
-            className="h-4 w-4 sm:h-5 sm:w-5" 
-            stroke="currentColor"
-            fill="none"
-          />
-        </button>
         <div className="flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-gray-100">
           <FileIcon 
             className="h-4 w-4 sm:h-5 sm:w-5 text-gray-500" 
@@ -143,6 +132,17 @@ const RecordedfileItemCard = ({
         <span className="text-2xs sm:text-xs md:text-sm text-gray-500">
           {isMobile ? formatMobileDate(_creationTime) : formatDate(_creationTime)}
         </span>
+        <button
+          onClick={(e) => shareViaEmail(e)}
+          className="flex h-6 w-6 sm:h-8 sm:w-8 items-center justify-center rounded-full text-gray-400 hover:bg-blue-100 hover:text-blue-600"
+          aria-label="Share via email"
+        >
+          <Mail 
+            className="h-4 w-4 sm:h-5 sm:w-5" 
+            stroke="currentColor"
+            fill="none"
+          />
+        </button>
         <button
           onClick={(e) => {
             e.preventDefault();
