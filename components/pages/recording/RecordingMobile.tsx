@@ -64,7 +64,7 @@ export default function RecordingMobile({
     });
     
     // Build the professional email body
-    let emailBody = `Howdy,\n\nPlease see the ${reportTypeDisplay} for ${currentDate} below.\n\n`;
+    let emailBody = `Howdy,\n\n`;
     
     // Add directive if available (this is the main communication to recipient)
     if (directive && directive.trim()) {
@@ -83,6 +83,12 @@ export default function RecordingMobile({
     
     // Add report type specific details if available
     const reportType = note.reportType || 'general';
+    
+    // Add cost impact notifications for delays or material issues
+    if ((reportType === 'progress' && note.delays !== "Not mentioned") || 
+        (reportType === 'quality_control' && note.qualityIssues !== "Not mentioned")) {
+      emailBody += `NOTICE: Please be advised that delays or material issues may result in additional costs. Responsible parties will be held accountable for these costs.\n\n`;
+    }
     
     // Helper function to add a field if it exists and is not "Not mentioned"
     const addField = (label: string, value?: string) => {
