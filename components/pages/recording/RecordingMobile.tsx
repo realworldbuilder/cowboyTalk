@@ -76,11 +76,6 @@ export default function RecordingMobile({
       emailBody += `Required Actions:\n${actionItemsText}\n\n`;
     }
     
-    // Add summary if available
-    if (summary) {
-      emailBody += `Summary:\n${summary}\n\n`;
-    }
-    
     // Add report type specific details if available
     const reportType = note.reportType || 'general';
     
@@ -88,95 +83,6 @@ export default function RecordingMobile({
     if ((reportType === 'progress' && note.delays !== "Not mentioned") || 
         (reportType === 'quality_control' && note.qualityIssues !== "Not mentioned")) {
       emailBody += `NOTICE: Please be advised that delays or material issues may result in additional costs. Responsible parties will be held accountable for these costs.\n\n`;
-    }
-    
-    // Helper function to add a field if it exists and is not "Not mentioned"
-    const addField = (label: string, value?: string) => {
-      if (value && value !== "Not mentioned") {
-        emailBody += `${label}: ${value}\n`;
-      }
-    };
-    
-    // Only add additional details header if there are details to include
-    let hasAdditionalDetails = false;
-    
-    // Check if there are construction report fields to include
-    if (note.isConstructionReport && 
-       (note.manpower !== "Not mentioned" || 
-        note.weather !== "Not mentioned" || 
-        note.delays !== "Not mentioned" || 
-        note.openIssues !== "Not mentioned" || 
-        note.equipment !== "Not mentioned")) {
-      hasAdditionalDetails = true;
-    }
-    
-    // Check for report type specific fields
-    if ((reportType === 'daily_activity' && (note.laborDetails !== "Not mentioned" || note.materialsUsed !== "Not mentioned")) ||
-        (reportType === 'safety_incident' && (note.incidentType !== "Not mentioned" || note.incidentDescription !== "Not mentioned" || 
-                                             note.peopleInvolved !== "Not mentioned" || note.correctiveActions !== "Not mentioned")) ||
-        (reportType === 'quality_control' && (note.inspectionResults !== "Not mentioned" || note.testResults !== "Not mentioned" || 
-                                             note.qualityIssues !== "Not mentioned")) ||
-        (reportType === 'progress' && (note.milestonesAchieved !== "Not mentioned" || note.scheduledVsActual !== "Not mentioned" || 
-                                      note.budgetImpact !== "Not mentioned")) ||
-        (reportType === 'change_order' && (note.changeDescription !== "Not mentioned" || note.reasonForChange !== "Not mentioned" || 
-                                          note.costImpact !== "Not mentioned" || note.scheduleImpact !== "Not mentioned")) ||
-        (reportType === 'initial_rfi' && (note.rfiNumber !== "Not mentioned" || note.rfiQuestion !== "Not mentioned" || 
-                                         note.rfiContext !== "Not mentioned" || note.requiredResponseDate !== "Not mentioned"))) {
-      hasAdditionalDetails = true;
-    }
-    
-    if (hasAdditionalDetails) {
-      emailBody += `Additional Details:\n`;
-      
-      // Original construction report fields
-      if (note.isConstructionReport) {
-        addField("Manpower", note.manpower);
-        addField("Weather", note.weather);
-        addField("Delays", note.delays);
-        addField("Open Issues", note.openIssues);
-        addField("Equipment", note.equipment);
-      }
-      
-      // Add fields based on report type
-      switch (reportType) {
-        case 'daily_activity':
-          addField("Labor Details", note.laborDetails);
-          addField("Materials Used", note.materialsUsed);
-          break;
-        
-        case 'safety_incident':
-          addField("Incident Type", note.incidentType);
-          addField("Incident Description", note.incidentDescription);
-          addField("People Involved", note.peopleInvolved);
-          addField("Corrective Actions", note.correctiveActions);
-          break;
-        
-        case 'quality_control':
-          addField("Inspection Results", note.inspectionResults);
-          addField("Test Results", note.testResults);
-          addField("Quality Issues", note.qualityIssues);
-          break;
-        
-        case 'progress':
-          addField("Milestones Achieved", note.milestonesAchieved);
-          addField("Scheduled vs Actual", note.scheduledVsActual);
-          addField("Budget Impact", note.budgetImpact);
-          break;
-        
-        case 'change_order':
-          addField("Change Description", note.changeDescription);
-          addField("Reason for Change", note.reasonForChange);
-          addField("Cost Impact", note.costImpact);
-          addField("Schedule Impact", note.scheduleImpact);
-          break;
-
-        case 'initial_rfi':
-          addField("RFI Number", note.rfiNumber);
-          addField("RFI Question", note.rfiQuestion);
-          addField("RFI Context", note.rfiContext);
-          addField("Required Response Date", note.requiredResponseDate);
-          break;
-      }
     }
     
     // Add a professional closing
