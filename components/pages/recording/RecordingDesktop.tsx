@@ -92,13 +92,8 @@ export default function RecordingDesktop({
     
     // Add directive if available (this is the main communication to recipient)
     if (directive && directive.trim()) {
-      // Check if directive starts with a name followed by comma or colon
-      let formattedDirective = directive;
-      const nameMatch = directive.match(/^([^,.!?]+)[,:](.+)/);
-      if (nameMatch) {
-        // Remove the name and keep just the instruction
-        formattedDirective = nameMatch[2].trim();
-      }
+      // Use the entire directive without removing any parts
+      const formattedDirective = directive.trim();
       
       // Use the directive directly without assuming a middleman
       emailBody += `${formattedDirective}\n\n`;

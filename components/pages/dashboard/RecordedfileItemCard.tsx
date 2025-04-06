@@ -125,33 +125,16 @@ const RecordedfileItemCard = ({
     
     // Add directive if available (this is the main communication to recipient)
     if (note.directive && note.directive.trim()) {
-      // Get the directive text
+      // Get the complete directive text
       let formattedDirective = note.directive.trim();
       
-      // Transform directive to direct address
-      // Replace "Please reach out to [Party]" patterns
-      formattedDirective = formattedDirective.replace(
-        /please reach out to ([\w\s]+) and/i,
-        "You must"
-      );
-      
-      // Replace "They need to" with "You need to"
-      formattedDirective = formattedDirective.replace(
-        /they need to/i,
-        "You need to"
-      );
-      
-      // Replace "Ensure they" with "You must"
-      formattedDirective = formattedDirective.replace(
-        /ensure they/i,
-        "You must"
-      );
-      
-      // Replace "Also, ensure they" with "Also, you must"
-      formattedDirective = formattedDirective.replace(
-        /Also, ensure they/i,
-        "Also, you must"
-      );
+      // Transform directive to direct address without removing any parts
+      // Replace third-person references with second-person
+      formattedDirective = formattedDirective
+        .replace(/please reach out to ([\w\s]+) and/i, "You must")
+        .replace(/they need to/i, "You need to")
+        .replace(/ensure they/i, "You must")
+        .replace(/Also, ensure they/i, "Also, you must");
       
       // Use the directive directly addressing the responsible party
       emailBody += `${formattedDirective}\n\n`;
