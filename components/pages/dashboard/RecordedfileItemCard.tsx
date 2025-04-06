@@ -147,11 +147,11 @@ const RecordedfileItemCard = ({
     
     // Add cost impact notifications based on specific content with direct responsibility language
     if (note.reportType === 'progress' && note.delays !== "Not mentioned") {
-      emailBody += `NOTICE: These schedule delays may result in additional costs. You are directly responsible and will be held accountable for costs associated with these delays and any recovery measures needed.\n\n`;
+      emailBody += `NOTICE: These schedule delays may result in additional costs. You may be held responsible for costs associated with these delays and any recovery measures needed.\n\n`;
     } else if (note.reportType === 'quality_control' && note.qualityIssues !== "Not mentioned") {
-      emailBody += `NOTICE: These quality issues may result in rework costs and schedule impacts. You are directly responsible and will be held accountable for all remediation costs.\n\n`;
+      emailBody += `NOTICE: These quality issues may result in rework costs and schedule impacts. You may be held responsible for all remediation costs.\n\n`;
     } else if (note.reportType === 'safety_incident' && (note.correctiveActions !== "Not mentioned" || note.incidentDescription !== "Not mentioned")) {
-      emailBody += `NOTICE: This safety incident requires immediate corrective action. You are directly responsible for this situation. Costs related to investigation, work stoppage, and compliance measures are your responsibility.\n\n`;
+      emailBody += `NOTICE: This safety incident requires immediate corrective action. You may be held responsible for costs related to investigation, work stoppage, and compliance measures.\n\n`;
     }
     
     // Add a professional closing that emphasizes direct communication
