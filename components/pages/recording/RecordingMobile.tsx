@@ -88,12 +88,12 @@ export default function RecordingMobile({
     // Add report type specific details if available
     const reportType = note.reportType || 'general';
     
-    // Add more intelligent cost impact notifications based on specific report type and content
-    if (reportType === 'progress') {
+    // Add more intelligent cost impact notifications based on specific content
+    if (reportType === 'progress' && note.delays !== "Not mentioned") {
       emailBody += `NOTICE: These schedule delays will result in additional costs. You will be held accountable for costs associated with these delays and any recovery measures needed.\n\n`;
-    } else if (reportType === 'quality_control') {
+    } else if (reportType === 'quality_control' && note.qualityIssues !== "Not mentioned") {
       emailBody += `NOTICE: These quality issues will result in rework costs and schedule impacts. You will be held accountable for all remediation costs.\n\n`;
-    } else if (reportType === 'safety_incident') {
+    } else if (reportType === 'safety_incident' && (note.correctiveActions !== "Not mentioned" || note.incidentDescription !== "Not mentioned")) {
       emailBody += `NOTICE: This safety incident requires immediate corrective action. All costs related to investigation, work stoppage, and compliance measures will be your responsibility.\n\n`;
     }
     
