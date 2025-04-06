@@ -20,6 +20,7 @@ const RecordedfileItemCard = ({
 }) => {
   const deleteNote = useMutation(api.notes.removeNote);
   const [isMobile, setIsMobile] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const { user } = useUser();
 
   useEffect(() => {
@@ -109,6 +110,25 @@ const RecordedfileItemCard = ({
     window.open(mailtoLink, '_blank');
   }
 
+  function handleDelete(e: React.MouseEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    setShowDeleteConfirm(true);
+  }
+
+  function confirmDelete(e: React.MouseEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    deleteNote({ id: _id });
+    setShowDeleteConfirm(false);
+  }
+
+  function cancelDelete(e: React.MouseEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    setShowDeleteConfirm(false);
+  }
+
   return (
     <Link
       href={`/recording/${_id}`}
@@ -134,7 +154,7 @@ const RecordedfileItemCard = ({
         </span>
         <button
           onClick={(e) => shareViaEmail(e)}
-          className="flex h-6 w-6 sm:h-8 sm:w-8 items-center justify-center rounded-full text-gray-400 hover:bg-blue-100 hover:text-blue-600"
+          className="flex h-6 w-6 sm:h-8 sm:w-8 items-center justify-center rounded-full text-gray-400 hover:bg-primary hover:text-white"
           aria-label="Share via email"
         >
           <Mail 
@@ -144,11 +164,8 @@ const RecordedfileItemCard = ({
           />
         </button>
         <button
-          onClick={(e) => {
-            e.preventDefault();
-            deleteNote({ id: _id });
-          }}
-          className="flex h-6 w-6 sm:h-8 sm:w-8 items-center justify-center rounded-full text-gray-400 hover:bg-gray-200 hover:text-gray-600"
+          onClick={handleDelete}
+          className="flex h-6 w-6 sm:h-8 sm:w-8 items-center justify-center rounded-full text-gray-400 hover:bg-red-100 hover:text-red-600"
           aria-label="Delete note"
         >
           <Trash2 
@@ -158,6 +175,36 @@ const RecordedfileItemCard = ({
           />
         </button>
       </div>
+
+      {/* Delete confirmation dialog */}
+      {showDeleteConfirm && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+          onClick={cancelDelete}
+        >
+          <div 
+            className="bg-white p-4 rounded-lg shadow-lg max-w-xs w-full"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="text-lg font-semibold mb-2">Confirm Deletion</h3>
+            <p className="mb-4">Are you sure you want to delete this recording? This action cannot be undone.</p>
+            <div className="flex justify-end space-x-2">
+              <button
+                onClick={cancelDelete}
+                className="px-3 py-1 text-sm rounded bg-gray-200 hover:bg-gray-300"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmDelete}
+                className="px-3 py-1 text-sm rounded bg-red-500 text-white hover:bg-red-600"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </Link>
   );
 };
