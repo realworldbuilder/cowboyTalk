@@ -97,11 +97,13 @@ export default function RecordingDesktop({
     // Add report type specific details if available
     const reportType = note.reportType || 'general';
     
-    // Add cost impact notifications for delays or material issues
-    if ((reportType === 'progress' && note.delays !== "Not mentioned") || 
-        (reportType === 'quality_control' && note.qualityIssues !== "Not mentioned") ||
-        (reportType === 'safety_incident')) {
-      emailBody += `NOTICE: Please be advised that delays, material issues, or safety incidents may result in additional costs. Responsible parties will be held accountable for these costs.\n\n`;
+    // Add more intelligent cost impact notifications based on specific report type and content
+    if (reportType === 'progress' && note.delays !== "Not mentioned") {
+      emailBody += `NOTICE: The schedule delays described in this report may result in additional costs. Responsible parties will be held accountable for costs associated with these delays and any recovery measures needed.\n\n`;
+    } else if (reportType === 'quality_control' && note.qualityIssues !== "Not mentioned") {
+      emailBody += `NOTICE: The quality issues identified in this report may result in rework costs and potential schedule impacts. Responsible parties will be held accountable for these remediation costs.\n\n`;
+    } else if (reportType === 'safety_incident') {
+      emailBody += `NOTICE: This safety incident may result in additional costs related to investigation, corrective actions, potential work stoppage, and compliance measures. Responsible parties may be held accountable for these costs.\n\n`;
     }
     
     // Add a professional closing
