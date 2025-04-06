@@ -86,8 +86,16 @@ export default function RecordingDesktop({
     
     // Add directive if available (this is the main communication to recipient)
     if (directive && directive.trim()) {
+      // Check if directive starts with a name followed by comma or colon
+      let formattedDirective = directive;
+      const nameMatch = directive.match(/^([^,.!?]+)[,:](.+)/);
+      if (nameMatch) {
+        // Remove the name and keep just the instruction
+        formattedDirective = nameMatch[2].trim();
+      }
+      
       // Use the directive directly without assuming a middleman
-      emailBody += `${directive}\n\n`;
+      emailBody += `${formattedDirective}\n\n`;
       
       // Add a note about the email being a direct instruction
       emailBody += `This notice requires your immediate attention and direct action.\n\n`;
@@ -103,11 +111,11 @@ export default function RecordingDesktop({
     
     // Add more intelligent cost impact notifications based on specific content
     if (reportType === 'progress' && note.delays !== "Not mentioned") {
-      emailBody += `NOTICE: These schedule delays will result in additional costs. You will be held accountable for costs associated with these delays and any recovery measures needed.\n\n`;
+      emailBody += `NOTICE: These schedule delays may result in additional costs. You will be held accountable for costs associated with these delays and any recovery measures needed.\n\n`;
     } else if (reportType === 'quality_control' && note.qualityIssues !== "Not mentioned") {
-      emailBody += `NOTICE: These quality issues will result in rework costs and schedule impacts. You will be held accountable for all remediation costs.\n\n`;
+      emailBody += `NOTICE: These quality issues may result in rework costs and schedule impacts. You will be held accountable for all remediation costs.\n\n`;
     } else if (reportType === 'safety_incident' && (note.correctiveActions !== "Not mentioned" || note.incidentDescription !== "Not mentioned")) {
-      emailBody += `NOTICE: This safety incident requires immediate corrective action. All costs related to investigation, work stoppage, and compliance measures will be your responsibility.\n\n`;
+      emailBody += `NOTICE: This safety incident requires immediate corrective action. Costs related to investigation, work stoppage, and compliance measures may be your responsibility.\n\n`;
     }
     
     // Add a professional closing
