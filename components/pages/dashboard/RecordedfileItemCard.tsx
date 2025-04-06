@@ -125,13 +125,8 @@ const RecordedfileItemCard = ({
     
     // Add directive if available (this is the main communication to recipient)
     if (note.directive && note.directive.trim()) {
-      // Check if directive starts with a name followed by comma or colon
-      let formattedDirective = note.directive;
-      const nameMatch = note.directive.match(/^([^,.!?]+)[,:](.+)/);
-      if (nameMatch) {
-        // Remove the name and keep just the instruction
-        formattedDirective = nameMatch[2].trim();
-      }
+      // Always use the full directive text - no trimming
+      const formattedDirective = note.directive.trim();
       
       // Use the directive directly addressing the responsible party
       emailBody += `${formattedDirective}\n\n`;
