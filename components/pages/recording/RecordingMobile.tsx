@@ -19,6 +19,7 @@ export default function RecordingMobile({
   const [transcriptOpen, setTranscriptOpen] = useState<boolean>(true);
   const [reportOpen, setReportOpen] = useState<boolean>(false);
   const [actionItemOpen, setActionItemOpen] = useState<boolean>(false);
+  const { user } = useUser();
 
   const mutateActionItems = useMutation(api.notes.removeActionItem);
 
@@ -28,8 +29,7 @@ export default function RecordingMobile({
   }
 
   function shareViaEmail() {
-    // Get current user info
-    const { user } = useUser();
+    // Format user name
     const userName = user ? `${user.firstName} ${user.lastName}` : 'Your Name';
     
     // Format the action items as a list

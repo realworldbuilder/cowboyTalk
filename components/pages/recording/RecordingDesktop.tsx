@@ -32,6 +32,7 @@ export default function RecordingDesktop({
     equipment
   } = note;
   const [showTranscript, setShowTranscript] = useState<boolean>(true);
+  const { user } = useUser();
 
   const mutateActionItems = useMutation(api.notes.removeActionItem);
 
@@ -41,8 +42,7 @@ export default function RecordingDesktop({
   }
 
   function shareViaEmail() {
-    // Get current user info
-    const { user } = useUser();
+    // Format user name
     const userName = user ? `${user.firstName} ${user.lastName}` : 'Your Name';
     
     // Format the action items as a list
