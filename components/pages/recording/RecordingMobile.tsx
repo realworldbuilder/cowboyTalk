@@ -28,10 +28,7 @@ export default function RecordingMobile({
 
   function shareViaEmail() {
     // Format the action items as a list
-    const actionItemsText = actionItems.map(item => `- ${item.task}`).join('\n');
-    
-    // Build the report content
-    let emailBody = `${title}\n\n`;
+    const actionItemsText = actionItems.map(item => `• ${item.task}`).join('\n');
     
     // Get report type display name for email subject
     let reportTypeDisplay = '';
@@ -58,21 +55,30 @@ export default function RecordingMobile({
         reportTypeDisplay = 'General Report';
     }
     
-    // Add a clear notification section at the top
-    emailBody += `NOTIFICATION: ${reportTypeDisplay}\n`;
-    emailBody += `DATE: ${new Date().toLocaleDateString()}\n\n`;
+    // Current date formatted nicely
+    const currentDate = new Date().toLocaleDateString('en-US', {
+      weekday: 'long',
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric'
+    });
     
-    if (summary) {
-      emailBody += `SUMMARY:\n${summary}\n\n`;
-    }
+    // Build the professional email body
+    let emailBody = `Hello,\n\nPlease see the ${reportTypeDisplay} for ${currentDate} below.\n\n`;
     
+    // Add directive if available (this is the main communication to recipient)
     if (directive && directive.trim()) {
-      emailBody += `DIRECTIVE:\n${directive}\n\n`;
+      emailBody += `${directive}\n\n`;
     }
     
-    // Highlight action items next for better visibility
+    // Highlight action items next if available
     if (actionItems.length > 0) {
-      emailBody += `REQUIRED ACTIONS:\n${actionItemsText}\n\n`;
+      emailBody += `Required Actions:\n${actionItemsText}\n\n`;
+    }
+    
+    // Add summary if available
+    if (summary) {
+      emailBody += `Summary:\n${summary}\n\n`;
     }
     
     // Add report type specific details if available
@@ -81,66 +87,97 @@ export default function RecordingMobile({
     // Helper function to add a field if it exists and is not "Not mentioned"
     const addField = (label: string, value?: string) => {
       if (value && value !== "Not mentioned") {
-        emailBody += `${label}:\n${value}\n\n`;
+        emailBody += `${label}: ${value}\n`;
       }
     };
     
-    emailBody += `ADDITIONAL DETAILS:\n`;
+    // Only add additional details header if there are details to include
+    let hasAdditionalDetails = false;
     
-    // Original construction report fields
-    if (note.isConstructionReport) {
-      addField("Manpower", note.manpower);
-      addField("Weather", note.weather);
-      addField("Delays", note.delays);
-      addField("Open Issues", note.openIssues);
-      addField("Equipment", note.equipment);
+    // Check if there are construction report fields to include
+    if (note.isConstructionReport && 
+       (note.manpower !== "Not mentioned" || 
+        note.weather !== "Not mentioned" || 
+        note.delays !== "Not mentioned" || 
+        note.openIssues !== "Not mentioned" || 
+        note.equipment !== "Not mentioned")) {
+      hasAdditionalDetails = true;
     }
     
-    // Add fields based on report type
-    switch (reportType) {
-      case 'daily_activity':
-        addField("Labor Details", note.laborDetails);
-        addField("Materials Used", note.materialsUsed);
-        break;
+    // Check for report type specific fields
+    if ((reportType === 'daily_activity' && (note.laborDetails !== "Not mentioned" || note.materialsUsed !== "Not mentioned")) ||
+        (reportType === 'safety_incident' && (note.incidentType !== "Not mentioned" || note.incidentDescription !== "Not mentioned" || 
+                                             note.peopleInvolved !== "Not mentioned" || note.correctiveActions !== "Not mentioned")) ||
+        (reportType === 'quality_control' && (note.inspectionResults !== "Not mentioned" || note.testResults !== "Not mentioned" || 
+                                             note.qualityIssues !== "Not mentioned")) ||
+        (reportType === 'progress' && (note.milestonesAchieved !== "Not mentioned" || note.scheduledVsActual !== "Not mentioned" || 
+                                      note.budgetImpact !== "Not mentioned")) ||
+        (reportType === 'change_order' && (note.changeDescription !== "Not mentioned" || note.reasonForChange !== "Not mentioned" || 
+                                          note.costImpact !== "Not mentioned" || note.scheduleImpact !== "Not mentioned")) ||
+        (reportType === 'initial_rfi' && (note.rfiNumber !== "Not mentioned" || note.rfiQuestion !== "Not mentioned" || 
+                                         note.rfiContext !== "Not mentioned" || note.requiredResponseDate !== "Not mentioned"))) {
+      hasAdditionalDetails = true;
+    }
+    
+    if (hasAdditionalDetails) {
+      emailBody += `Additional Details:\n`;
       
-      case 'safety_incident':
-        addField("Incident Type", note.incidentType);
-        addField("Incident Description", note.incidentDescription);
-        addField("People Involved", note.peopleInvolved);
-        addField("Corrective Actions", note.correctiveActions);
-        break;
+      // Original construction report fields
+      if (note.isConstructionReport) {
+        addField("Manpower", note.manpower);
+        addField("Weather", note.weather);
+        addField("Delays", note.delays);
+        addField("Open Issues", note.openIssues);
+        addField("Equipment", note.equipment);
+      }
       
-      case 'quality_control':
-        addField("Inspection Results", note.inspectionResults);
-        addField("Test Results", note.testResults);
-        addField("Quality Issues", note.qualityIssues);
-        break;
-      
-      case 'progress':
-        addField("Milestones Achieved", note.milestonesAchieved);
-        addField("Scheduled vs Actual", note.scheduledVsActual);
-        addField("Budget Impact", note.budgetImpact);
-        break;
-      
-      case 'change_order':
-        addField("Change Description", note.changeDescription);
-        addField("Reason for Change", note.reasonForChange);
-        addField("Cost Impact", note.costImpact);
-        addField("Schedule Impact", note.scheduleImpact);
-        break;
+      // Add fields based on report type
+      switch (reportType) {
+        case 'daily_activity':
+          addField("Labor Details", note.laborDetails);
+          addField("Materials Used", note.materialsUsed);
+          break;
+        
+        case 'safety_incident':
+          addField("Incident Type", note.incidentType);
+          addField("Incident Description", note.incidentDescription);
+          addField("People Involved", note.peopleInvolved);
+          addField("Corrective Actions", note.correctiveActions);
+          break;
+        
+        case 'quality_control':
+          addField("Inspection Results", note.inspectionResults);
+          addField("Test Results", note.testResults);
+          addField("Quality Issues", note.qualityIssues);
+          break;
+        
+        case 'progress':
+          addField("Milestones Achieved", note.milestonesAchieved);
+          addField("Scheduled vs Actual", note.scheduledVsActual);
+          addField("Budget Impact", note.budgetImpact);
+          break;
+        
+        case 'change_order':
+          addField("Change Description", note.changeDescription);
+          addField("Reason for Change", note.reasonForChange);
+          addField("Cost Impact", note.costImpact);
+          addField("Schedule Impact", note.scheduleImpact);
+          break;
 
-      case 'initial_rfi':
-        addField("RFI Number", note.rfiNumber);
-        addField("RFI Question", note.rfiQuestion);
-        addField("RFI Context", note.rfiContext);
-        addField("Required Response Date", note.requiredResponseDate);
-        break;
+        case 'initial_rfi':
+          addField("RFI Number", note.rfiNumber);
+          addField("RFI Question", note.rfiQuestion);
+          addField("RFI Context", note.rfiContext);
+          addField("Required Response Date", note.requiredResponseDate);
+          break;
+      }
     }
     
-    emailBody += `\nThis notification was sent via Cowboy Talk.`;
+    // Add a professional closing
+    emailBody += `\nPlease let me know if you have any questions or need additional information.\n\nBest regards,\n\n[Your Name]\n`;
     
     // Create mailto link with subject and body
-    const mailtoLink = `mailto:?subject=${encodeURIComponent(reportTypeDisplay + ': ' + (title || 'Action Required'))}&body=${encodeURIComponent(emailBody)}`;
+    const mailtoLink = `mailto:?subject=${encodeURIComponent(reportTypeDisplay + ': ' + (title || 'Update'))} - ${currentDate.split(',')[0]}&body=${encodeURIComponent(emailBody)}`;
     
     // Open the email client
     window.open(mailtoLink, '_blank');
