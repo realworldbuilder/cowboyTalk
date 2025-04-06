@@ -19,8 +19,7 @@ const Banner = () => {
           AI-Powered Construction Reports
         </h1>
         <p className="mt-4 text-center text-base font-light tracking-tight sm:mt-6 sm:text-xl lg:mt-8 lg:text-3xl">
-          Cowboy Talk turns your voice notes into detailed reports—daily logs, safety, quality, 
-          equipment, change orders, and more—No typing. No whining. Reports done before high noon, partner.
+        Cowboy Talk wrangles your voice notes into slick reports—daily logs, safety hollers, quality checks, equipment rundowns, change orders, you name it. No typin’, no fussin’. Just talk, and it’s done faster than a rattlesnake’s strike ‘fore noon, partner.
         </p>
         <Link
           href={'/dashboard'}
