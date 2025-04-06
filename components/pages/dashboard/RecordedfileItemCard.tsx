@@ -1,5 +1,5 @@
 import { api } from '@/convex/_generated/api';
-import { useMutation } from 'convex/react';
+import { useMutation, useQuery } from 'convex/react';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { FileIcon, Trash2, Mail } from 'lucide-react';
@@ -22,6 +22,10 @@ const RecordedfileItemCard = ({
   const [isMobile, setIsMobile] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const { user } = useUser();
+  
+  // Query for the complete note data and action items
+  const noteDetails = useQuery(api.notes.getNote, { id: _id }) || { note: null };
+  const actionItems = useQuery(api.notes.getActionItems, { id: _id }) || [];
 
   useEffect(() => {
     const checkMobile = () => {
@@ -60,8 +64,22 @@ const RecordedfileItemCard = ({
     e.preventDefault();
     e.stopPropagation();
     
+    // If noteDetails is not loaded yet, return
+    if (!noteDetails.note) return;
+    
+    const note = noteDetails.note;
+    
     // Format user name
     const userName = user ? `${user.firstName} ${user.lastName}` : 'Your Name';
+    
+    // Format the action items as a list
+    let actionItemsText = actionItems.map((item: any) => `• ${item.task}`).join('\n');
+    
+    // Add a follow-up action item
+    if (actionItemsText) {
+      actionItemsText += '\n';
+    }
+    actionItemsText += `• Follow up to confirm all requested actions have been completed`;
     
     // Current date formatted nicely
     const currentDate = new Date().toLocaleDateString('en-US', {
@@ -73,7 +91,7 @@ const RecordedfileItemCard = ({
     
     // Get report type display name for email subject
     let reportTypeDisplay = '';
-    switch (reportType) {
+    switch (note.reportType) {
       case 'daily_activity':
         reportTypeDisplay = 'Daily Activity Report';
         break;
@@ -96,15 +114,45 @@ const RecordedfileItemCard = ({
         reportTypeDisplay = 'General Report';
     }
     
-    // Simple email body for the dashboard version - they can view details in the full page
+    // Build the professional email body
     let emailBody = `Howdy,\n\n`;
-    emailBody += `I've shared a ${reportTypeDisplay} with you that requires your attention.\n\n`;
-    emailBody += `Please view the full recording here: ${window.location.origin}/recording/${_id}\n\n`;
-    emailBody += `This notice requires your immediate attention and direct action.\n\n`;
+    
+    // Add directive if available (this is the main communication to recipient)
+    if (note.directive && note.directive.trim()) {
+      // Check if directive starts with a name followed by comma or colon
+      let formattedDirective = note.directive;
+      const nameMatch = note.directive.match(/^([^,.!?]+)[,:](.+)/);
+      if (nameMatch) {
+        // Remove the name and keep just the instruction
+        formattedDirective = nameMatch[2].trim();
+      }
+      
+      // Use the directive directly without assuming a middleman
+      emailBody += `${formattedDirective}\n\n`;
+      
+      // Add a note about the email being a direct instruction
+      emailBody += `This notice requires your immediate attention and direct action.\n\n`;
+    }
+    
+    // Highlight action items next if available
+    if (actionItems.length > 0) {
+      emailBody += `Required Actions:\n${actionItemsText}\n\n`;
+    }
+    
+    // Add cost impact notifications based on specific content
+    if (note.reportType === 'progress' && note.delays !== "Not mentioned") {
+      emailBody += `NOTICE: These schedule delays may result in additional costs. You will be held accountable for costs associated with these delays and any recovery measures needed.\n\n`;
+    } else if (note.reportType === 'quality_control' && note.qualityIssues !== "Not mentioned") {
+      emailBody += `NOTICE: These quality issues may result in rework costs and schedule impacts. You will be held accountable for all remediation costs.\n\n`;
+    } else if (note.reportType === 'safety_incident' && (note.correctiveActions !== "Not mentioned" || note.incidentDescription !== "Not mentioned")) {
+      emailBody += `NOTICE: This safety incident requires immediate corrective action. Costs related to investigation, work stoppage, and compliance measures may be your responsibility.\n\n`;
+    }
+    
+    // Add a professional closing
     emailBody += `Please let me know if you have any questions or need additional information.\n\nBest regards,\n${userName}`;
     
     // Create mailto link with subject and body
-    const mailtoLink = `mailto:?subject=${encodeURIComponent(reportTypeDisplay + ': ' + (title || 'Update'))} - ${currentDate.split(',')[0]}&body=${encodeURIComponent(emailBody)}`;
+    const mailtoLink = `mailto:?subject=${encodeURIComponent(reportTypeDisplay + ': ' + (note.title || 'Update'))} - ${currentDate.split(',')[0]}&body=${encodeURIComponent(emailBody)}`;
     
     // Open the email client
     window.open(mailtoLink, '_blank');
