@@ -6,6 +6,7 @@ import toast, { Toaster } from 'react-hot-toast';
 import { Doc } from '@/convex/_generated/dataModel';
 import ConstructionReportDetails from './ConstructionReportDetails';
 import { XCircle, Mail } from 'lucide-react';
+import { useUser } from '@clerk/nextjs';
 
 export default function RecordingMobile({
   note,
@@ -27,6 +28,10 @@ export default function RecordingMobile({
   }
 
   function shareViaEmail() {
+    // Get current user info
+    const { user } = useUser();
+    const userName = user ? `${user.firstName} ${user.lastName}` : 'Your Name';
+    
     // Format the action items as a list
     const actionItemsText = actionItems.map(item => `• ${item.task}`).join('\n');
     
@@ -87,7 +92,7 @@ export default function RecordingMobile({
     }
     
     // Add a professional closing
-    emailBody += `Please let me know if you have any questions or need additional information.\n\nBest regards,\n[Your Name]`;
+    emailBody += `Please let me know if you have any questions or need additional information.\n\nBest regards,\n${userName}`;
     
     // Create mailto link with subject and body
     const mailtoLink = `mailto:?subject=${encodeURIComponent(reportTypeDisplay + ': ' + (title || 'Update'))} - ${currentDate.split(',')[0]}&body=${encodeURIComponent(emailBody)}`;
