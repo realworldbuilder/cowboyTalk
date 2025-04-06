@@ -133,29 +133,29 @@ const RecordedfileItemCard = ({
         formattedDirective = nameMatch[2].trim();
       }
       
-      // Use the directive directly without assuming a middleman
+      // Use the directive directly addressing the responsible party
       emailBody += `${formattedDirective}\n\n`;
       
-      // Add a note about the email being a direct instruction
-      emailBody += `This notice requires your immediate attention and direct action.\n\n`;
+      // Add a note emphasizing direct responsibility
+      emailBody += `You are directly responsible for addressing this issue. This notice requires your immediate attention and action.\n\n`;
     }
     
     // Highlight action items next if available
     if (actionItems.length > 0) {
-      emailBody += `Required Actions:\n${actionItemsText}\n\n`;
+      emailBody += `Your Required Actions:\n${actionItemsText}\n\n`;
     }
     
-    // Add cost impact notifications based on specific content
+    // Add cost impact notifications based on specific content with direct responsibility language
     if (note.reportType === 'progress' && note.delays !== "Not mentioned") {
-      emailBody += `NOTICE: These schedule delays may result in additional costs. You will be held accountable for costs associated with these delays and any recovery measures needed.\n\n`;
+      emailBody += `NOTICE: These schedule delays may result in additional costs. You are directly responsible and will be held accountable for costs associated with these delays and any recovery measures needed.\n\n`;
     } else if (note.reportType === 'quality_control' && note.qualityIssues !== "Not mentioned") {
-      emailBody += `NOTICE: These quality issues may result in rework costs and schedule impacts. You will be held accountable for all remediation costs.\n\n`;
+      emailBody += `NOTICE: These quality issues may result in rework costs and schedule impacts. You are directly responsible and will be held accountable for all remediation costs.\n\n`;
     } else if (note.reportType === 'safety_incident' && (note.correctiveActions !== "Not mentioned" || note.incidentDescription !== "Not mentioned")) {
-      emailBody += `NOTICE: This safety incident requires immediate corrective action. Costs related to investigation, work stoppage, and compliance measures may be your responsibility.\n\n`;
+      emailBody += `NOTICE: This safety incident requires immediate corrective action. You are directly responsible for this situation. Costs related to investigation, work stoppage, and compliance measures are your responsibility.\n\n`;
     }
     
-    // Add a professional closing
-    emailBody += `Please let me know if you have any questions or need additional information.\n\nBest regards,\n${userName}`;
+    // Add a professional closing that emphasizes direct communication
+    emailBody += `Respond directly to confirm your understanding and compliance with these requirements.\n\nBest regards,\n${userName}`;
     
     // Create mailto link with subject and body
     const mailtoLink = `mailto:?subject=${encodeURIComponent(reportTypeDisplay + ': ' + (note.title || 'Update'))} - ${currentDate.split(',')[0]}&body=${encodeURIComponent(emailBody)}`;
