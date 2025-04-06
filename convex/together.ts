@@ -241,14 +241,19 @@ The response must be formatted in **valid JSON** using this exact structure:
 - For the directive, write it as a message to others who need to take action, using direct language focused on what they need to know or do
 - For the directive, frame it from the perspective of the sender communicating to the recipient(s)
 - Analyze the content objectively to determine the most accurate report type
-- Categorize the report as one of these types based solely on the content:
-  - daily_activity: Reports tracking progress, labor, equipment, and materials used
-  - safety_incident: Reports documenting accidents, near-misses, or hazards
-  - quality_control: Reports about material issues, defects, wrong specifications (color, size, type), inspections, tests, or any concerns about whether delivered materials or completed work meets required standards or expectations
-  - progress: Reports updating project milestones and delays
-  - initial_rfi: Reports requesting information or clarification on project details
-  - change_order: Reports recording deviations from the original plan
-  - general: Any other report that doesn't fit these categories
+- Categorize the report based on these detailed definitions:
+  - daily_activity: Reports tracking progress, labor, equipment, and materials used. Look for keywords like "today we did", "crew worked on", "materials delivered", "equipment used", "completed work on".
+  - safety_incident: Reports documenting accidents, near-misses, hazards, or safety violations. Look for keywords like "accident", "injury", "hazard", "unsafe", "fell", "PPE", "safety violation".
+  - quality_control: Reports about material issues, defects, wrong specifications (color, size, type), inspections, tests, or any concerns about whether delivered materials or completed work meets required standards or expectations. Look for keywords like "wrong", "incorrect", "defect", "damaged", "missing", "doesn't match spec", "failed test", "wrong color", "wrong size", "poor quality".
+  - progress: Reports updating project milestones, schedule status, and delays. Look for keywords like "behind schedule", "ahead of schedule", "milestone", "completed phase", "delay", "timeline", "deadline".
+  - initial_rfi: Reports requesting information or clarification on project details. Look for keywords like "need clarification", "question about", "requesting information", "unclear", "missing detail", "need to know".
+  - change_order: Reports recording deviations from the original plan. Look for keywords like "change from plan", "modification", "revision", "additional work", "scope change", "different approach".
+  - general: Any other report that doesn't clearly fit these categories after careful consideration.
+- Apply contextual logic when deciding between categories:
+  - If a report mentions a delivery issue about timing only, classify as "progress"
+  - If a report mentions a delivery with wrong materials or specifications, classify as "quality_control"
+  - If a report mentions both safety concerns and quality issues, prioritize "safety_incident"
+  - When in doubt between progress and daily_activity, use daily_activity for routine work updates and progress for significant milestone or schedule information
 - Set isConstructionReport to true only if the content is clearly related to construction activities
 - Treat all report types equally without prioritizing daily construction reports
 - Use "Not mentioned" (exact string) for any fields that aren't relevant to the report type or aren't mentioned.
@@ -392,14 +397,19 @@ The response must be formatted in **valid JSON** using this exact structure:
 - For the directive, write it as a message to others who need to take action, using direct language focused on what they need to know or do
 - For the directive, frame it from the perspective of the sender communicating to the recipient(s)
 - Analyze the content objectively to determine the most accurate report type
-- Categorize the report as one of these types based solely on the content:
-  - daily_activity: Reports tracking progress, labor, equipment, and materials used
-  - safety_incident: Reports documenting accidents, near-misses, or hazards
-  - quality_control: Reports about material issues, defects, wrong specifications (color, size, type), inspections, tests, or any concerns about whether delivered materials or completed work meets required standards or expectations
-  - progress: Reports updating project milestones and delays
-  - initial_rfi: Reports requesting information or clarification on project details
-  - change_order: Reports recording deviations from the original plan
-  - general: Any other report that doesn't fit these categories
+- Categorize the report based on these detailed definitions:
+  - daily_activity: Reports tracking progress, labor, equipment, and materials used. Look for keywords like "today we did", "crew worked on", "materials delivered", "equipment used", "completed work on".
+  - safety_incident: Reports documenting accidents, near-misses, hazards, or safety violations. Look for keywords like "accident", "injury", "hazard", "unsafe", "fell", "PPE", "safety violation".
+  - quality_control: Reports about material issues, defects, wrong specifications (color, size, type), inspections, tests, or any concerns about whether delivered materials or completed work meets required standards or expectations. Look for keywords like "wrong", "incorrect", "defect", "damaged", "missing", "doesn't match spec", "failed test", "wrong color", "wrong size", "poor quality".
+  - progress: Reports updating project milestones, schedule status, and delays. Look for keywords like "behind schedule", "ahead of schedule", "milestone", "completed phase", "delay", "timeline", "deadline".
+  - initial_rfi: Reports requesting information or clarification on project details. Look for keywords like "need clarification", "question about", "requesting information", "unclear", "missing detail", "need to know".
+  - change_order: Reports recording deviations from the original plan. Look for keywords like "change from plan", "modification", "revision", "additional work", "scope change", "different approach".
+  - general: Any other report that doesn't clearly fit these categories after careful consideration.
+- Apply contextual logic when deciding between categories:
+  - If a report mentions a delivery issue about timing only, classify as "progress"
+  - If a report mentions a delivery with wrong materials or specifications, classify as "quality_control"
+  - If a report mentions both safety concerns and quality issues, prioritize "safety_incident"
+  - When in doubt between progress and daily_activity, use daily_activity for routine work updates and progress for significant milestone or schedule information
 - Set isConstructionReport to true only if the content is clearly related to construction activities
 - Treat all report types equally without prioritizing daily construction reports
 - Use "Not mentioned" (exact string) for any fields that aren't relevant to the report type or aren't mentioned.
