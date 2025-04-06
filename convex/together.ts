@@ -38,7 +38,7 @@ const NoteSchema = z.object({
   directive: z
     .string()
     .describe(
-      'A notification or directive to others who need to take action. Use clear, direct language that communicates what the recipient needs to know or do.',
+      'A direct instruction to the recipient who needs to take action. Use imperative, action-oriented language (e.g., "Fix this issue immediately" instead of "Please request someone to fix this"). Write as if speaking directly to the person responsible.',
     )
     .max(500),
   actionItems: z
@@ -190,7 +190,7 @@ The response must be formatted in **valid JSON** using this exact structure:
 {
   "title": "Short descriptive title of what the voice message is about",
   "summary": "A short summary in the first person point of view of the person recording the voice message (maximum 500 characters)",
-  "directive": "A notification or directive to others who need to take action. Use clear, direct language that communicates what the recipient needs to know or do. (maximum 500 characters)",
+  "directive": "A direct instruction to the recipient who needs to take action. Use imperative, action-oriented language focused on what they need to do. Address the recipient directly as if they are responsible for taking action. (maximum 500 characters)",
   "actionItems": ["Action item 1", "Action item 2", ...],
   "reportType": "daily_activity", "safety_incident", "quality_control", "progress", "initial_rfi", "change_order", or "general",
   "isConstructionReport": boolean (true/false),
@@ -346,7 +346,7 @@ The response must be formatted in **valid JSON** using this exact structure:
 {
   "title": "Short descriptive title of what the voice message is about",
   "summary": "A short summary in the first person point of view of the person recording the voice message (maximum 500 characters)",
-  "directive": "A notification or directive to others who need to take action. Use clear, direct language that communicates what the recipient needs to know or do. (maximum 500 characters)",
+  "directive": "A direct instruction to the recipient who needs to take action. Use imperative, action-oriented language focused on what they need to do. Address the recipient directly as if they are responsible for taking action. (maximum 500 characters)",
   "actionItems": ["Action item 1", "Action item 2", ...],
   "reportType": "daily_activity", "safety_incident", "quality_control", "progress", "initial_rfi", "change_order", or "general",
   "isConstructionReport": boolean (true/false),

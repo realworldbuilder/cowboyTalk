@@ -73,7 +73,11 @@ export default function RecordingMobile({
     
     // Add directive if available (this is the main communication to recipient)
     if (directive && directive.trim()) {
+      // Use the directive directly without assuming a middleman
       emailBody += `${directive}\n\n`;
+      
+      // Add a note about the email being a direct instruction
+      emailBody += `This notice requires your immediate attention and direct action.\n\n`;
     }
     
     // Highlight action items next if available
@@ -86,11 +90,11 @@ export default function RecordingMobile({
     
     // Add more intelligent cost impact notifications based on specific report type and content
     if (reportType === 'progress' && note.delays !== "Not mentioned") {
-      emailBody += `NOTICE: The schedule delays described in this report may result in additional costs. Responsible parties will be held accountable for costs associated with these delays and any recovery measures needed.\n\n`;
+      emailBody += `NOTICE: These schedule delays will result in additional costs. You will be held accountable for costs associated with these delays and any recovery measures needed.\n\n`;
     } else if (reportType === 'quality_control' && note.qualityIssues !== "Not mentioned") {
-      emailBody += `NOTICE: The quality issues identified in this report may result in rework costs and potential schedule impacts. Responsible parties will be held accountable for these remediation costs.\n\n`;
+      emailBody += `NOTICE: These quality issues will result in rework costs and schedule impacts. You will be held accountable for all remediation costs.\n\n`;
     } else if (reportType === 'safety_incident') {
-      emailBody += `NOTICE: This safety incident may result in additional costs related to investigation, corrective actions, potential work stoppage, and compliance measures. Responsible parties may be held accountable for these costs.\n\n`;
+      emailBody += `NOTICE: This safety incident requires immediate corrective action. All costs related to investigation, work stoppage, and compliance measures will be your responsibility.\n\n`;
     }
     
     // Add a professional closing
