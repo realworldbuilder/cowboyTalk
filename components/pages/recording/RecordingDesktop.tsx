@@ -46,7 +46,13 @@ export default function RecordingDesktop({
     const userName = user ? `${user.firstName} ${user.lastName}` : 'Your Name';
     
     // Format the action items as a list
-    const actionItemsText = actionItems.map(item => `• ${item.task}`).join('\n');
+    let actionItemsText = actionItems.map(item => `• ${item.task}`).join('\n');
+    
+    // Add a follow-up action item
+    if (actionItemsText) {
+      actionItemsText += '\n';
+    }
+    actionItemsText += `• Follow up to confirm all requested actions have been completed`;
     
     // Get report type display name for email subject
     let reportTypeDisplay = '';
