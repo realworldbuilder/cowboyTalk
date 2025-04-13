@@ -7,6 +7,21 @@ import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { Id } from '@/convex/_generated/dataModel';
 
+// Helper function to render list items that can be strings or objects with description/type
+const renderListItem = (item: any, idx: number) => {
+  if (typeof item === 'string') {
+    return <li key={idx}>{item}</li>;
+  } else if (item.description) {
+    return (
+      <li key={idx}>
+        {item.type && <strong>{item.type}: </strong>}
+        {item.description}
+      </li>
+    );
+  }
+  return null;
+};
+
 // Helper components for displaying report-specific details
 export const SafetyReport = ({ details }: { details: any }) => {
   if (!details) return null;
@@ -17,9 +32,7 @@ export const SafetyReport = ({ details }: { details: any }) => {
         <div className="mb-3">
           <h4 className="font-medium">Incidents:</h4>
           <ul className="ml-5 list-disc">
-            {details.incidents.map((item: string, idx: number) => (
-              <li key={idx}>{item}</li>
-            ))}
+            {details.incidents.map((item: any, idx: number) => renderListItem(item, idx))}
           </ul>
         </div>
       )}
@@ -27,9 +40,7 @@ export const SafetyReport = ({ details }: { details: any }) => {
         <div className="mb-3">
           <h4 className="font-medium">Hazards:</h4>
           <ul className="ml-5 list-disc">
-            {details.hazards.map((item: string, idx: number) => (
-              <li key={idx}>{item}</li>
-            ))}
+            {details.hazards.map((item: any, idx: number) => renderListItem(item, idx))}
           </ul>
         </div>
       )}
@@ -52,9 +63,7 @@ export const QualityReport = ({ details }: { details: any }) => {
         <div className="mb-3">
           <h4 className="font-medium">Control Points:</h4>
           <ul className="ml-5 list-disc">
-            {details.controlPoints.map((item: string, idx: number) => (
-              <li key={idx}>{item}</li>
-            ))}
+            {details.controlPoints.map((item: any, idx: number) => renderListItem(item, idx))}
           </ul>
         </div>
       )}
@@ -62,9 +71,7 @@ export const QualityReport = ({ details }: { details: any }) => {
         <div className="mb-3">
           <h4 className="font-medium">Non-Conformance Issues:</h4>
           <ul className="ml-5 list-disc">
-            {details.nonConformanceIssues.map((item: string, idx: number) => (
-              <li key={idx}>{item}</li>
-            ))}
+            {details.nonConformanceIssues.map((item: any, idx: number) => renderListItem(item, idx))}
           </ul>
         </div>
       )}
@@ -72,9 +79,7 @@ export const QualityReport = ({ details }: { details: any }) => {
         <div className="mb-3">
           <h4 className="font-medium">Corrective Actions:</h4>
           <ul className="ml-5 list-disc">
-            {details.correctiveActions.map((item: string, idx: number) => (
-              <li key={idx}>{item}</li>
-            ))}
+            {details.correctiveActions.map((item: any, idx: number) => renderListItem(item, idx))}
           </ul>
         </div>
       )}
@@ -103,9 +108,7 @@ export const EquipmentReport = ({ details }: { details: any }) => {
         <div className="mb-3">
           <h4 className="font-medium">Mechanical Issues:</h4>
           <ul className="ml-5 list-disc">
-            {details.mechanicalIssues.map((item: string, idx: number) => (
-              <li key={idx}>{item}</li>
-            ))}
+            {details.mechanicalIssues.map((item: any, idx: number) => renderListItem(item, idx))}
           </ul>
         </div>
       )}
@@ -122,9 +125,7 @@ export const RFIReport = ({ details }: { details: any }) => {
         <div className="mb-3">
           <h4 className="font-medium">Questions:</h4>
           <ul className="ml-5 list-disc">
-            {details.questions.map((item: string, idx: number) => (
-              <li key={idx}>{item}</li>
-            ))}
+            {details.questions.map((item: any, idx: number) => renderListItem(item, idx))}
           </ul>
         </div>
       )}
@@ -132,9 +133,7 @@ export const RFIReport = ({ details }: { details: any }) => {
         <div className="mb-3">
           <h4 className="font-medium">Clarifications:</h4>
           <ul className="ml-5 list-disc">
-            {details.clarifications.map((item: string, idx: number) => (
-              <li key={idx}>{item}</li>
-            ))}
+            {details.clarifications.map((item: any, idx: number) => renderListItem(item, idx))}
           </ul>
         </div>
       )}
@@ -142,9 +141,7 @@ export const RFIReport = ({ details }: { details: any }) => {
         <div className="mb-3">
           <h4 className="font-medium">Document References:</h4>
           <ul className="ml-5 list-disc">
-            {details.documentReferences.map((item: string, idx: number) => (
-              <li key={idx}>{item}</li>
-            ))}
+            {details.documentReferences.map((item: any, idx: number) => renderListItem(item, idx))}
           </ul>
         </div>
       )}

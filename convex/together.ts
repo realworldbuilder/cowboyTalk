@@ -89,6 +89,19 @@ export const chat = internalAction({
               - EQUIPMENT: equipment status, operating hours, mechanical issues
               - RFI: questions, technical clarifications, document references
               
+              For list items (incidents, hazards, etc.), you can return either:
+              - Simple strings, or
+              - Objects with 'type' and 'description' fields for more detailed categorization
+              
+              Example for incidents:
+              incidents: [
+                "Worker fell from ladder", // simple string format
+                { // OR structured object format
+                  "type": "Fall Incident",
+                  "description": "Worker fell from ladder due to improper positioning"
+                }
+              ]
+              
               Return a JSON object with:
               - reportType: "SAFETY", "QUALITY", "EQUIPMENT", or "RFI"
               - title: Short descriptive title
@@ -169,24 +182,96 @@ export const saveSummary = internalMutation({
     title: v.string(),
     actionItems: v.array(v.string()),
     safetyDetails: v.optional(v.object({
-      incidents: v.optional(v.array(v.string())),
-      hazards: v.optional(v.array(v.string())),
+      incidents: v.optional(v.array(
+        v.union(
+          v.string(),
+          v.object({
+            description: v.string(),
+            type: v.string()
+          })
+        )
+      )),
+      hazards: v.optional(v.array(
+        v.union(
+          v.string(),
+          v.object({
+            description: v.string(),
+            type: v.string()
+          })
+        )
+      )),
       ppeCompliance: v.optional(v.string()),
     })),
     qualityDetails: v.optional(v.object({
-      controlPoints: v.optional(v.array(v.string())),
-      nonConformanceIssues: v.optional(v.array(v.string())),
-      correctiveActions: v.optional(v.array(v.string())),
+      controlPoints: v.optional(v.array(
+        v.union(
+          v.string(),
+          v.object({
+            description: v.string(),
+            type: v.string()
+          })
+        )
+      )),
+      nonConformanceIssues: v.optional(v.array(
+        v.union(
+          v.string(),
+          v.object({
+            description: v.string(),
+            type: v.string()
+          })
+        )
+      )),
+      correctiveActions: v.optional(v.array(
+        v.union(
+          v.string(),
+          v.object({
+            description: v.string(),
+            type: v.string()
+          })
+        )
+      )),
     })),
     equipmentDetails: v.optional(v.object({
       status: v.optional(v.string()),
       operatingHours: v.optional(v.string()),
-      mechanicalIssues: v.optional(v.array(v.string())),
+      mechanicalIssues: v.optional(v.array(
+        v.union(
+          v.string(),
+          v.object({
+            description: v.string(),
+            type: v.string()
+          })
+        )
+      )),
     })),
     rfiDetails: v.optional(v.object({
-      questions: v.optional(v.array(v.string())),
-      clarifications: v.optional(v.array(v.string())),
-      documentReferences: v.optional(v.array(v.string())),
+      questions: v.optional(v.array(
+        v.union(
+          v.string(),
+          v.object({
+            description: v.string(),
+            type: v.string()
+          })
+        )
+      )),
+      clarifications: v.optional(v.array(
+        v.union(
+          v.string(),
+          v.object({
+            description: v.string(),
+            type: v.string()
+          })
+        )
+      )),
+      documentReferences: v.optional(v.array(
+        v.union(
+          v.string(),
+          v.object({
+            description: v.string(),
+            type: v.string()
+          })
+        )
+      )),
     })),
   },
   handler: async (ctx, args) => {
