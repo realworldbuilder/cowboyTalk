@@ -274,7 +274,7 @@ export default function RecordingDesktop({
           >
             {generatingTitle ? 'Generating Title...' : title ?? 'Untitled Note'}
           </h1>
-          {reportType && (
+          {reportType && !generatingTitle && (
             <div className="mt-2 flex justify-center">
               <span className="rounded-full bg-dark px-3 py-1 text-sm text-light">
                 {reportType} REPORT

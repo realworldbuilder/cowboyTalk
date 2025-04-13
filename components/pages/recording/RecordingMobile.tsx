@@ -98,7 +98,7 @@ export default function RecordingMobile({
           <h1 className="text-center text-xl font-medium text-dark md:text-2xl">
             {title ?? 'Untitled Note'}
           </h1>
-          {reportType && (
+          {reportType && !note.generatingTitle && (
             <div className="mt-2 flex justify-center">
               <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
                 {reportType} REPORT
