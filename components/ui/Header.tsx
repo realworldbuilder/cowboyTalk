@@ -5,37 +5,39 @@ import { currentUser } from '@clerk/nextjs';
 export default async function Header() {
   const user = await currentUser();
   return (
-    <div className="container relative m-0 mx-auto py-10 md:px-10">
+    <header className="w-full py-6 md:py-8">
       <div className="max-width flex items-center justify-between">
         {/* logo */}
-        <Link className="flex w-fit items-center gap-[2px]" href="/dashboard">
+        <Link className="flex items-center gap-2" href="/dashboard">
           <img
             src="/logo.png"
-            width={50}
-            height={50}
+            width={40}
+            height={40}
             alt="logo"
-            className="h-5 w-5 md:h-8 md:w-8"
+            className="h-6 w-6 md:h-8 md:w-8"
           />
-          <h1 className="text-xl font-medium text-[#25292F] md:text-3xl">
+          <h1 className="text-xl font-medium text-dark md:text-2xl">
             Cowboy Talk
           </h1>
         </Link>
-        {/* buttons */}
-        <div className="flex w-fit items-center gap-[22px]">
+        {/* navigation */}
+        <div className="flex items-center gap-5 md:gap-8">
           {user ? (
             <>
-              <Link
-                href={'/dashboard'}
-                className="hidden cursor-pointer text-lg text-dark md:inline-block lg:text-xl"
-              >
-                Recordings
-              </Link>
-              <Link
-                href={'/dashboard/action-items'}
-                className="hidden cursor-pointer text-lg text-dark md:inline-block lg:text-xl"
-              >
-                Action Items
-              </Link>
+              <nav className="hidden md:flex md:gap-6">
+                <Link
+                  href={'/dashboard'}
+                  className="text-dark/80 hover:text-primary text-lg transition-colors"
+                >
+                  Recordings
+                </Link>
+                <Link
+                  href={'/dashboard/action-items'}
+                  className="text-dark/80 hover:text-primary text-lg transition-colors"
+                >
+                  Action Items
+                </Link>
+              </nav>
               <UserNav
                 image={user.imageUrl}
                 name={user.firstName + ' ' + user.lastName}
@@ -48,13 +50,13 @@ export default async function Header() {
             </>
           ) : (
             <Link href="/dashboard">
-              <button className="text-md primary-gradient primary-shadow rounded-lg px-5 py-1 text-center text-light md:px-10 md:py-2 md:text-xl">
+              <button className="btn-primary">
                 Sign in
               </button>
             </Link>
           )}
         </div>
       </div>
-    </div>
+    </header>
   );
 }

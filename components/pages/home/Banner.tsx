@@ -2,63 +2,58 @@ import Link from 'next/link';
 
 const Banner = () => {
   return (
-    <div className="relative h-[350px] w-full  px-4 md:h-[605px] md:px-6 lg:px-8 xl:px-10 2xl:px-0">
-      <div className="flex h-full w-full flex-col items-center justify-center">
+    <section className="w-full py-16 md:py-24">
+      <div className="max-width flex flex-col items-center justify-center">
         <a
           href="https://togetherai.link"
           target="_blank"
           rel="noreferrer"
-          className="mb-5 cursor-pointer rounded-2xl border border-black px-4 py-1 text-sm text-slate-600 transition duration-300 ease-in-out hover:text-slate-700 sm:text-base"
+          className="mb-5 rounded-full border border-muted/30 px-4 py-1 text-sm text-muted transition duration-300 hover:border-muted/50 hover:text-dark sm:text-base"
         >
-          Powered by <span className="font-bold">Together.ai </span>and{' '}
-          <span className="font-bold">Convex</span>
+          Powered by <span className="font-medium">Together.ai </span>and{' '}
+          <span className="font-medium">Convex</span>
         </a>
-        <h1 className="inline-block text-center text-4xl font-medium tracking-tighter text-dark lg:text-7xl">
-          AI-Powered Voice <br className="hidden lg:inline-block" />
+        <h1 className="text-center text-4xl font-medium tracking-tight text-dark md:text-5xl lg:text-6xl">
+          AI-Powered Voice <br className="hidden md:inline-block" />
           Note Taking
         </h1>
-        <p className="mt-8 text-center text-xl font-light tracking-tight lg:text-3xl">
+        <p className="mt-6 max-w-2xl text-center text-lg font-light tracking-tight text-dark/80 md:mt-8 md:text-xl">
           Cowboy Talk seamlessly converts your voice notes into{' '}
-          <span className="font-bold">
-            organized <br className="hidden lg:inline-block" />
-            summaries
+          <span className="font-medium text-primary">
+            organized summaries
           </span>{' '}
-          and <span className="font-bold">clear action items</span> using AI.
+          and <span className="font-medium text-primary">clear action items</span> using AI.
         </p>
         <Link
           href={'/dashboard'}
-          className="primary-gradient primary-shadow mx-auto mt-16 flex max-w-xl items-center justify-center gap-5 rounded-full px-4 py-2 text-center text-sm text-light md:px-12 md:py-4 md:text-2xl"
+          className="btn-primary mt-10 flex items-center justify-center gap-3 rounded-full px-6 py-3 md:mt-12 md:text-lg"
         >
           Get Started
-          <img
-            src="/icons/get-started.svg"
-            alt="get started icon"
-            className="mt-2 h-6 w-6 md:h-9 md:w-9"
-          />
+          <svg 
+            width="20" 
+            height="20" 
+            viewBox="0 0 20 20" 
+            fill="none" 
+            xmlns="http://www.w3.org/2000/svg"
+            className="ml-1"
+          >
+            <path 
+              d="M4.16667 10H15.8333M15.8333 10L10 4.16667M15.8333 10L10 15.8333" 
+              stroke="currentColor" 
+              strokeWidth="2" 
+              strokeLinecap="round" 
+              strokeLinejoin="round"
+            />
+          </svg>
         </Link>
       </div>
-      {/* background gradient */}
-      <div className="absolute bottom-0 left-0 right-0 top-0 z-[-1] hidden h-full w-full grid-cols-3 md:grid">
-        <BackgroundGradient />
-        <BackgroundGradient />
-        <BackgroundGradient />
+      {/* subtle background effect */}
+      <div className="absolute inset-0 -z-10 opacity-50">
+        <div className="absolute left-1/4 top-1/4 h-64 w-64 rounded-full bg-primary/5 blur-3xl"></div>
+        <div className="absolute right-1/4 top-1/2 h-64 w-64 rounded-full bg-secondary/5 blur-3xl"></div>
       </div>
-    </div>
+    </section>
   );
 };
-
-function BackgroundGradient() {
-  return (
-    <div
-      className="h-full w-full rounded-full"
-      style={{
-        opacity: '0.4',
-        background:
-          'radial-gradient(54.14% 54.14% at 50% 50%, #B94700 0%, rgba(185, 71, 0, 0.02) 100%)',
-        filter: 'blur(177px)',
-      }}
-    />
-  );
-}
 
 export default Banner;

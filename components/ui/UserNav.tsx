@@ -37,34 +37,36 @@ export function UserNav({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="relative h-10 w-10 rounded-full">
-          <Avatar className="h-10 w-10">
+        <Button variant="ghost" className="relative h-8 w-8 rounded-full border border-dark/10 p-0 hover:bg-light md:h-10 md:w-10">
+          <Avatar className="h-full w-full">
             <Image src={image} fill alt="profile picture" sizes="10rem" />
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-56 bg-white" align="end" forceMount>
+      <DropdownMenuContent className="w-56 bg-light shadow-minimal" align="end" forceMount>
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium leading-none text-black">
+            <p className="text-sm font-medium leading-none text-dark">
               {name}
             </p>
-            <p className="text-xs leading-none text-black">{email}</p>
+            <p className="text-xs leading-none text-muted">
+              {email}
+            </p>
           </div>
         </DropdownMenuLabel>
-        <DropdownMenuSeparator />
+        <DropdownMenuSeparator className="bg-dark/10" />
         <Link href="/dashboard">
-          <DropdownMenuItem className="hover:cursor-pointer hover:bg-gray-200">
-            <Paintbrush2 className="mr-2 h-4 w-4 text-black" />
-            <span className="text-black">Dashboard</span>
+          <DropdownMenuItem className="text-dark focus:bg-accent/30 focus:text-primary">
+            <Paintbrush2 className="mr-2 h-4 w-4" />
+            <span>Dashboard</span>
           </DropdownMenuItem>
         </Link>
         <DropdownMenuItem
           onClick={handleSignOut}
-          className="hover:cursor-pointer hover:bg-gray-200"
+          className="text-dark focus:bg-accent/30 focus:text-primary"
         >
-          <LogOut className="mr-2 h-4 w-4 text-black" />
-          <span className="text-black">Log out</span>
+          <LogOut className="mr-2 h-4 w-4" />
+          <span>Log out</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
