@@ -4,6 +4,7 @@ import { useMutation } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import toast, { Toaster } from 'react-hot-toast';
 import { Doc, Id } from '@/convex/_generated/dataModel';
+import EmailModal from '@/components/EmailModal';
 
 // Import the report components from RecordingDesktop
 import { 
@@ -28,11 +29,13 @@ export default function RecordingMobile({
     safetyDetails,
     qualityDetails,
     equipmentDetails,
-    rfiDetails 
+    rfiDetails,
+    _id
   } = note;
   const [transcriptOpen, setTranscriptOpen] = useState(true);
   const [summaryOpen, setSummaryOpen] = useState(false);
   const [actionItemOpen, setActionItemOpen] = useState(false);
+  const [emailModalOpen, setEmailModalOpen] = useState(false);
 
   const mutateActionItems = useMutation(api.notes.removeActionItem);
 
@@ -58,6 +61,11 @@ export default function RecordingMobile({
 
   return (
     <div className="md:hidden">
+      <EmailModal 
+        isOpen={emailModalOpen}
+        onClose={() => setEmailModalOpen(false)}
+        noteId={_id}
+      />
       <div className="max-width my-5 flex flex-col items-center justify-center">
         <h1 className="leading text-center text-xl font-medium leading-[114.3%] tracking-[-0.75px] text-dark md:text-[35px] lg:text-[43px]">
           {title ?? 'Untitled Note'}
@@ -144,7 +152,7 @@ export default function RecordingMobile({
                   </div>
                 </div>
               ))}
-              <div className="mt-10 flex items-center justify-center">
+              <div className="mt-10 flex flex-col items-center justify-center space-y-3">
                 <Link
                   className="rounded-[7px] bg-dark px-5 py-[15px] text-[17px] leading-[79%] tracking-[-0.75px] text-light md:text-xl lg:px-[37px]"
                   style={{
@@ -154,6 +162,13 @@ export default function RecordingMobile({
                 >
                   View All Action Items
                 </Link>
+                <button
+                  className="rounded-[7px] bg-blue-600 px-5 py-[15px] text-[17px] leading-[79%] tracking-[-0.75px] text-light md:text-xl lg:px-[37px]"
+                  style={{ boxShadow: ' 0px 4px 4px 0px rgba(0, 0, 0, 0.25)' }}
+                  onClick={() => setEmailModalOpen(true)}
+                >
+                  Generate Email
+                </button>
               </div>
             </div>{' '}
           </div>

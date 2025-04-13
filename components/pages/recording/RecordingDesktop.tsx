@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { Id } from '@/convex/_generated/dataModel';
+import EmailModal from '@/components/EmailModal';
 
 // Helper function to render list items that can be strings or objects with description/type
 const renderListItem = (item: any, idx: number) => {
@@ -204,6 +205,7 @@ export default function RecordingDesktop({
     rfiDetails
   } = note;
   const [originalIsOpen, setOriginalIsOpen] = useState(true);
+  const [emailModalOpen, setEmailModalOpen] = useState(false);
 
   const mutateActionItems = useMutation(api.notes.removeActionItem);
 
@@ -229,6 +231,11 @@ export default function RecordingDesktop({
 
   return (
     <div className="hidden md:block">
+      <EmailModal 
+        isOpen={emailModalOpen}
+        onClose={() => setEmailModalOpen(false)}
+        noteId={_id}
+      />
       <div className="max-width mt-5 flex items-center justify-between">
         <div />
         <div className="text-center">
@@ -340,7 +347,7 @@ export default function RecordingDesktop({
                   </div>
                 </div>
               ))}
-          <div className="absolute bottom-5 left-1/2 flex -translate-x-1/2 items-center justify-center">
+          <div className="absolute bottom-5 left-1/2 flex -translate-x-1/2 flex-col items-center justify-center space-y-3 md:flex-row md:space-x-3 md:space-y-0">
             <Link
               className="rounded-[7px] bg-dark px-5 py-[15px] text-[17px] leading-[79%] tracking-[-0.75px] text-light md:text-xl lg:px-[37px]"
               style={{ boxShadow: ' 0px 4px 4px 0px rgba(0, 0, 0, 0.25)' }}
@@ -348,6 +355,13 @@ export default function RecordingDesktop({
             >
               View All Action Items
             </Link>
+            <button
+              className="rounded-[7px] bg-blue-600 px-5 py-[15px] text-[17px] leading-[79%] tracking-[-0.75px] text-light md:text-xl lg:px-[37px]"
+              style={{ boxShadow: ' 0px 4px 4px 0px rgba(0, 0, 0, 0.25)' }}
+              onClick={() => setEmailModalOpen(true)}
+            >
+              Generate Email
+            </button>
           </div>
         </div>
       </div>
