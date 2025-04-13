@@ -477,16 +477,16 @@ export const generateEmail = actionWithUser({
       .withIndex("by_noteId", (q: any) => q.eq("noteId", noteId))
       .collect();
     
-    // Prepare the context data
+    // Prepare the context data - use default values if not provided
     const emailContext = {
       note,
       actionItems,
       recipient: {
-        name: recipientName,
-        email: recipientEmail,
+        name: recipientName || "Team Member",
+        email: recipientEmail || "",
       },
       sender: {
-        name: senderName,
+        name: senderName || "Site Manager",
       },
       includeAttachments
     };
@@ -501,18 +501,17 @@ export const generateEmail = actionWithUser({
 
           # EMAIL STRUCTURE GUIDELINES
           - Write a professional subject line that clearly indicates the report type and main topic
-          - Include a brief greeting with the recipient's name
+          - Include a brief greeting
           - Start with a concise introduction explaining the purpose of the email
           - Format the body with clear sections and bullet points where appropriate
-          - Highlight key action items, deadlines, or urgent matters
-          - Close with a professional sign-off and sender's name
+          - Include key action items from the report
+          - Close with a professional sign-off
           - Use construction industry terminology appropriately
           
           # TONE AND STYLE
           - Keep the tone professional but conversational
           - Be direct and concise
           - Prioritize clarity over technical jargon
-          - Match the level of formality to the relationship (team member vs. client)
           - Emphasize safety concerns and critical issues appropriately
           
           # FOR DIFFERENT REPORT TYPES
@@ -523,12 +522,13 @@ export const generateEmail = actionWithUser({
           - GENERAL: Provide status updates and next steps
           
           # ATTACHMENT REFERENCES
-          ${includeAttachments ? "Mention that relevant documents, photos, or files are attached" : "Do not mention attachments"}
+          ${includeAttachments ? "Mention that relevant documents or photos are attached" : "Do not mention attachments"}
           
           # RESPONSE FORMAT
-          Provide the complete email with:
-          - Subject line
-          - Full body content with appropriate formatting
+          Provide the complete email as plain text with:
+          - First line should be: Subject: [THE EMAIL SUBJECT]
+          - Skip a line after subject
+          - Format the body with appropriate line breaks
           - No placeholder text - everything should be specific to this report`
         },
         {

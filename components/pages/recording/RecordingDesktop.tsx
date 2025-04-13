@@ -1,12 +1,11 @@
 import { api } from '@/convex/_generated/api';
 import { Doc } from '@/convex/_generated/dataModel';
 import { formatTimestamp } from '@/lib/utils';
-import { useMutation } from 'convex/react';
+import { useMutation, useAction } from 'convex/react';
 import Link from 'next/link';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { Id } from '@/convex/_generated/dataModel';
-import EmailModal from '@/components/EmailModal';
 
 // Helper function to render list items that can be strings or objects with description/type
 const renderListItem = (item: any, idx: number) => {
@@ -205,12 +204,46 @@ export default function RecordingDesktop({
     rfiDetails
   } = note;
   const [originalIsOpen, setOriginalIsOpen] = useState(true);
-  const [emailModalOpen, setEmailModalOpen] = useState(false);
-
+  const [isGeneratingEmail, setIsGeneratingEmail] = useState(false);
+  
+  const generateEmail = useAction(api.together.generateEmail);
   const mutateActionItems = useMutation(api.notes.removeActionItem);
 
   function removeActionItem(actionId: Id<'actionItems'>) {
     mutateActionItems({ id: actionId });
+  }
+  
+  async function handleEmailGeneration() {
+    setIsGeneratingEmail(true);
+    try {
+      const emailContent = await generateEmail({
+        noteId: _id,
+        recipientName: "",
+        recipientEmail: "",
+        senderName: "",
+        includeAttachments: false
+      });
+      
+      // Extract subject line (first line)
+      const lines = emailContent.split('\n');
+      let subject = title || "Construction Report";
+      let body = emailContent;
+      
+      // If we have a proper format with Subject line first
+      if (lines.length > 1 && lines[0].toLowerCase().startsWith('subject:')) {
+        subject = lines[0].substring(8).trim();
+        body = lines.slice(1).join('\n').trim();
+      }
+      
+      // Create mailto link
+      const mailtoLink = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+      window.open(mailtoLink, '_blank');
+    } catch (error) {
+      console.error('Error generating email:', error);
+      toast.error('Error generating email. Please try again.');
+    } finally {
+      setIsGeneratingEmail(false);
+    }
   }
 
   // Component to render the appropriate report details based on type
@@ -231,11 +264,6 @@ export default function RecordingDesktop({
 
   return (
     <div className="hidden md:block">
-      <EmailModal 
-        isOpen={emailModalOpen}
-        onClose={() => setEmailModalOpen(false)}
-        noteId={_id}
-      />
       <div className="max-width mt-5 flex items-center justify-between">
         <div />
         <div className="text-center">
@@ -358,9 +386,10 @@ export default function RecordingDesktop({
             <button
               className="rounded-[7px] bg-blue-600 px-5 py-[15px] text-[17px] leading-[79%] tracking-[-0.75px] text-light md:text-xl lg:px-[37px]"
               style={{ boxShadow: ' 0px 4px 4px 0px rgba(0, 0, 0, 0.25)' }}
-              onClick={() => setEmailModalOpen(true)}
+              onClick={handleEmailGeneration}
+              disabled={isGeneratingEmail}
             >
-              Generate Email
+              {isGeneratingEmail ? 'Generating Email...' : 'Email Report'}
             </button>
           </div>
         </div>
