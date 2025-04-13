@@ -5,33 +5,11 @@ export default function Footer() {
     <footer className="w-full border-t border-dark/10 py-6">
       <div className="max-width flex flex-col items-center justify-between gap-4 text-sm text-muted md:flex-row md:text-base">
         <div>
-          Powered by{' '}
-          <a
-            href="https://www.convex.dev"
-            target="_blank"
-            className="font-medium text-dark/70 transition-colors hover:text-primary"
-          >
-            Convex,{' '}
-          </a>
-          <a
-            href="https://togetherai.link"
-            target="_blank"
-            className="font-medium text-dark/70 transition-colors hover:text-primary"
-          >
-            Together
-          </a>
-          , and{' '}
-          <a
-            href="https://www.replicate.com"
-            target="_blank"
-            className="font-medium text-dark/70 transition-colors hover:text-primary"
-          >
-            Replicate
-          </a>
+          Built in God's country.
         </div>
         <div className="flex gap-4">
           <Link
-            href="https://twitter.com/nutlope"
+            href="https://twitter.com/zen_kai_zen"
             className="text-dark/50 transition-colors hover:text-primary"
             aria-label="Twitter"
           >
