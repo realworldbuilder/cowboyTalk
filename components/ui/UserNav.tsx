@@ -28,6 +28,12 @@ export function UserNav({
   const { signOut } = useClerk();
   const router = useRouter();
 
+  const handleSignOut = async () => {
+    await signOut();
+    // Use full-page navigation to avoid SPA-related cache issues
+    window.location.href = '/';
+  };
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -54,7 +60,7 @@ export function UserNav({
           </DropdownMenuItem>
         </Link>
         <DropdownMenuItem
-          onClick={() => signOut(() => router.push('/'))}
+          onClick={handleSignOut}
           className="hover:cursor-pointer hover:bg-gray-200"
         >
           <LogOut className="mr-2 h-4 w-4 text-black" />
