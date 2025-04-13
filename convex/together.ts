@@ -50,7 +50,8 @@ export const chat = internalAction({
     const { transcript } = args;
 
     try {
-      const extract = await client.chat.completions.create({
+      // Using a different approach without JSON_SCHEMA mode
+      const response = await togetherai.chat.completions.create({
         messages: [
           {
             role: 'system',
@@ -59,13 +60,28 @@ export const chat = internalAction({
           },
           { role: 'user', content: transcript },
         ],
-        model: 'meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo',
-        response_model: { schema: NoteSchema, name: 'SummarizeNotes' },
+        model: 'mistralai/Mixtral-8x7B-Instruct-v0.1',
         max_tokens: 1000,
         temperature: 0.6,
-        max_retries: 3,
+        response_format: { type: "json_object" }
       });
-      const { title, summary, actionItems } = extract;
+
+      // Parse the JSON response
+      const content = response.choices[0]?.message?.content || '{}';
+      let parsedResponse;
+      
+      try {
+        parsedResponse = JSON.parse(content);
+      } catch (parseError) {
+        console.error('Failed to parse JSON response', parseError);
+        throw new Error('Invalid JSON response from model');
+      }
+
+      const { 
+        title = 'Untitled Note', 
+        summary = 'Summary failed to generate', 
+        actionItems = [] 
+      } = parsedResponse;
 
       await ctx.runMutation(internal.together.saveSummary, {
         id: args.id,
