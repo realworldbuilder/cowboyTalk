@@ -109,6 +109,11 @@ export default defineSchema({
         )
       )),
     })),
+    generalDetails: v.optional(v.object({
+      observations: v.optional(v.array(v.string())),
+      progress: v.optional(v.string()),
+      nextSteps: v.optional(v.array(v.string())),
+    })),
     generatingTranscript: v.boolean(),
     generatingTitle: v.boolean(),
     generatingActionItems: v.boolean(),

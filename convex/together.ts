@@ -9,6 +9,7 @@ import { internal } from './_generated/api';
 import { z } from 'zod';
 import { actionWithUser } from './utils';
 import Instructor from '@instructor-ai/instructor';
+import { Doc } from './_generated/dataModel';
 
 const togetherApiKey = process.env.TOGETHER_API_KEY ?? 'undefined';
 
@@ -25,7 +26,7 @@ const client = Instructor({
 });
 
 const NoteSchema = z.object({
-  reportType: z.enum(['SAFETY', 'QUALITY', 'EQUIPMENT', 'RFI'])
+  reportType: z.enum(['SAFETY', 'QUALITY', 'EQUIPMENT', 'RFI', 'GENERAL'])
     .describe('The type of report detected from the transcript'),
   title: z
     .string()
@@ -62,6 +63,11 @@ const NoteSchema = z.object({
     clarifications: z.array(z.string()).optional(),
     documentReferences: z.array(z.string()).optional(),
   }).optional(),
+  generalDetails: z.object({
+    observations: z.array(z.string()).optional(),
+    progress: z.string().optional(),
+    nextSteps: z.array(z.string()).optional(),
+  }).optional(),
 });
 
 export const chat = internalAction({
@@ -83,13 +89,13 @@ export const chat = internalAction({
           {
             role: 'system',
             content:
-              `You are an AI specialized in construction report analysis. Your task is to accurately classify and structure voice notes into one of four report categories, extracting appropriate data fields based on the report type.
+              `You are an AI specialized in construction report analysis. Your task is to accurately classify and structure voice notes into one of five report categories, extracting appropriate data fields based on the report type.
 
               # CLASSIFICATION RULES
               - Analyze the transcript carefully before making a classification
               - Only classify if you have high confidence in the report type
               - If the report contains mixed content, choose the most dominant type
-              - Default to RFI if the classification is unclear
+              - Default to GENERAL if the classification is unclear
               
               # REPORT TYPES AND REQUIRED FIELDS
               
@@ -117,6 +123,12 @@ export const chat = internalAction({
               - clarifications: List areas needing additional information
               - documentReferences: List references to plans, specs, or documents
               
+              ## 5. GENERAL CONSTRUCTION REPORTS
+              Required fields:
+              - observations: List of general site observations or comments
+              - progress: Overall project or task progress as a detailed string
+              - nextSteps: List of recommended next steps or follow-up actions
+              
               # OUTPUT QUALITY GUIDELINES
               - Be concise but complete in all field entries
               - Use proper construction terminology
@@ -127,11 +139,11 @@ export const chat = internalAction({
               
               # RESPONSE FORMAT
               Return a JSON object with:
-              - reportType: "SAFETY", "QUALITY", "EQUIPMENT", or "RFI"
+              - reportType: "SAFETY", "QUALITY", "EQUIPMENT", "RFI", or "GENERAL"
               - title: Short descriptive title relevant to the report type
               - summary: Brief summary of key points (max 500 chars)
               - actionItems: Array of clear, actionable tasks derived from the report
-              - Plus ONLY the appropriate details object based on report type (safetyDetails, qualityDetails, equipmentDetails, or rfiDetails)`,
+              - Plus ONLY the appropriate details object based on report type (safetyDetails, qualityDetails, equipmentDetails, rfiDetails, or generalDetails)`,
           },
           { role: 'user', content: transcript },
         ],
@@ -154,14 +166,15 @@ export const chat = internalAction({
 
       // Validate the response structure before saving
       const { 
-        reportType = 'RFI', 
+        reportType = 'GENERAL', 
         title = 'Untitled Note', 
         summary = 'Summary failed to generate', 
         actionItems = [],
         safetyDetails,
         qualityDetails,
         equipmentDetails,
-        rfiDetails
+        rfiDetails,
+        generalDetails
       } = parsedResponse;
 
       // Ensure we have the correct details object based on report type
@@ -175,6 +188,7 @@ export const chat = internalAction({
         qualityDetails: reportType === 'QUALITY' ? ensureQualityDetails(qualityDetails) : undefined,
         equipmentDetails: reportType === 'EQUIPMENT' ? ensureEquipmentDetails(equipmentDetails) : undefined,
         rfiDetails: reportType === 'RFI' ? ensureRfiDetails(rfiDetails) : undefined,
+        generalDetails: reportType === 'GENERAL' ? ensureGeneralDetails(generalDetails) : undefined,
       };
 
       await ctx.runMutation(internal.together.saveSummary, validatedResponse);
@@ -182,7 +196,7 @@ export const chat = internalAction({
       console.error('Error extracting from voice message', e);
       await ctx.runMutation(internal.together.saveSummary, {
         id: args.id,
-        reportType: 'RFI',
+        reportType: 'GENERAL',
         summary: 'Summary failed to generate',
         actionItems: [],
         title: 'Processing Error',
@@ -224,6 +238,14 @@ function ensureRfiDetails(details: any = {}) {
   };
 }
 
+function ensureGeneralDetails(details: any = {}) {
+  return {
+    observations: Array.isArray(details?.observations) ? details.observations : [],
+    progress: details?.progress || 'Not specified',
+    nextSteps: Array.isArray(details?.nextSteps) ? details.nextSteps : [],
+  };
+}
+
 export const markProcessing = internalMutation({
   args: {
     id: v.id('notes'),
@@ -239,6 +261,7 @@ export const markProcessing = internalMutation({
       qualityDetails: undefined,
       equipmentDetails: undefined,
       rfiDetails: undefined,
+      generalDetails: undefined,
     });
   },
 });
@@ -359,6 +382,11 @@ export const saveSummary = internalMutation({
         )
       )),
     })),
+    generalDetails: v.optional(v.object({
+      observations: v.optional(v.array(v.string())),
+      progress: v.optional(v.string()),
+      nextSteps: v.optional(v.array(v.string())),
+    })),
   },
   handler: async (ctx, args) => {
     const { 
@@ -370,7 +398,8 @@ export const saveSummary = internalMutation({
       safetyDetails,
       qualityDetails,
       equipmentDetails,
-      rfiDetails
+      rfiDetails,
+      generalDetails
     } = args;
     
     await ctx.db.patch(id, {
@@ -381,7 +410,8 @@ export const saveSummary = internalMutation({
       safetyDetails,
       qualityDetails,
       equipmentDetails,
-      rfiDetails
+      rfiDetails,
+      generalDetails
     });
 
     let note = await ctx.db.get(id);
@@ -414,6 +444,105 @@ export const saveSummary = internalMutation({
       generatingActionItems: false,
     });
   },
+});
+
+// Generate an email based on a report
+export const generateEmail = actionWithUser({
+  args: {
+    noteId: v.id('notes'),
+    recipientName: v.string(),
+    recipientEmail: v.string(),
+    senderName: v.string(),
+    includeAttachments: v.boolean(),
+  },
+  handler: async (ctx, args): Promise<string> => {
+    const { noteId, recipientName, recipientEmail, senderName, includeAttachments } = args;
+    
+    // Get note directly - we're in an action so we can use ctx.db
+    const db = (ctx as any).db;
+    const note = await db.get(noteId);
+    
+    if (!note) {
+      throw new Error('Note not found');
+    }
+    
+    // Also verify this is the user's note
+    if (note.userId !== ctx.userId) {
+      throw new Error('Not authorized to access this note');
+    }
+    
+    // Get action items for this note
+    const actionItems = await db
+      .query("actionItems")
+      .withIndex("by_noteId", (q: any) => q.eq("noteId", noteId))
+      .collect();
+    
+    // Prepare the context data
+    const emailContext = {
+      note,
+      actionItems,
+      recipient: {
+        name: recipientName,
+        email: recipientEmail,
+      },
+      sender: {
+        name: senderName,
+      },
+      includeAttachments
+    };
+    
+    // Generate email content
+    const response = await togetherai.chat.completions.create({
+      messages: [
+        {
+          role: 'system',
+          content: `You are an AI specialized in writing professional construction emails based on report data. 
+          Your task is to compose a formal but conversational email that clearly communicates the key information from a construction report.
+
+          # EMAIL STRUCTURE GUIDELINES
+          - Write a professional subject line that clearly indicates the report type and main topic
+          - Include a brief greeting with the recipient's name
+          - Start with a concise introduction explaining the purpose of the email
+          - Format the body with clear sections and bullet points where appropriate
+          - Highlight key action items, deadlines, or urgent matters
+          - Close with a professional sign-off and sender's name
+          - Use construction industry terminology appropriately
+          
+          # TONE AND STYLE
+          - Keep the tone professional but conversational
+          - Be direct and concise
+          - Prioritize clarity over technical jargon
+          - Match the level of formality to the relationship (team member vs. client)
+          - Emphasize safety concerns and critical issues appropriately
+          
+          # FOR DIFFERENT REPORT TYPES
+          - SAFETY: Emphasize urgency of safety issues, clear action requirements
+          - QUALITY: Focus on standards, specifications, and corrective measures
+          - EQUIPMENT: Highlight operational impacts, maintenance schedules
+          - RFI: Clearly state questions/clarifications needed and any deadlines
+          - GENERAL: Provide status updates and next steps
+          
+          # ATTACHMENT REFERENCES
+          ${includeAttachments ? "Mention that relevant documents, photos, or files are attached" : "Do not mention attachments"}
+          
+          # RESPONSE FORMAT
+          Provide the complete email with:
+          - Subject line
+          - Full body content with appropriate formatting
+          - No placeholder text - everything should be specific to this report`
+        },
+        {
+          role: 'user',
+          content: JSON.stringify(emailContext)
+        }
+      ],
+      model: 'mistralai/Mixtral-8x7B-Instruct-v0.1',
+      max_tokens: 1500,
+      temperature: 0.7
+    });
+    
+    return response.choices[0]?.message?.content || 'Failed to generate email content';
+  }
 });
 
 export type SearchResult = {
