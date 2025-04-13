@@ -489,11 +489,11 @@ export const generateEmail = actionWithUser({
       messages: [
         {
           role: 'system',
-          content: `You are an AI specialized in writing professional construction emails based on report data.
-          Your task is to compose an email that clearly communicates the key information from a construction report.
+          content: `You are an AI specialized in writing professional construction emails based on the voice note summary.
+          Your task is to compose an email that clearly communicates the key information and any actions required.
 
           # EMAIL STRUCTURE GUIDELINES
-          - Start the email body with "Howdy [recipient name],"
+          - Start the email body with "Howdy,"
           - Keep a professional tone throughout
           - Use direct, straightforward language like a construction professional would
           - Format the body with clear sections and bullet points where appropriate
@@ -515,14 +515,12 @@ export const generateEmail = actionWithUser({
           - GENERAL: Provide status updates and next steps
           
           # FORMATTING RULES
-          - If attachments are mentioned, incorporate it naturally in the body rather than as a separate note
           - Format the email for clarity with appropriate spacing
-          - Action items should be clearly marked but without excessive formatting
+          - Action items should be listed as bullet points
           
           # RESPONSE FORMAT
           Provide the complete email as plain text with:
-          - First generate a subject line but do not include it in the email body
-          - Begin the email body directly with the "Howdy" greeting
+          - Begin the email body directly with the "Howdy," greeting
           - Include appropriate line breaks for readability
           - End with a professional signature`
         },
