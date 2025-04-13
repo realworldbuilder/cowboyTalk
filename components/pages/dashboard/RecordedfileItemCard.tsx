@@ -65,10 +65,10 @@ const RecordedfileItemCard = ({
   return (
     <Link
       href={`/recording/${_id}`}
-      className="card my-2 flex flex-col justify-between overflow-hidden border-none transition hover:bg-accent/10 sm:flex-row sm:items-center sm:py-4 md:my-3"
+      className="card flex flex-col overflow-hidden border-none transition hover:bg-accent/10"
     >
-      <div className="flex items-center gap-3 p-4 sm:p-0 sm:pl-4">
-        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary">
+      <div className="flex items-start gap-3 p-4">
+        <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
           <svg 
             width="16" 
             height="16" 
@@ -90,7 +90,7 @@ const RecordedfileItemCard = ({
             <path d="M10 9H9H8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
         </div>
-        <div className="flex flex-col">
+        <div className="flex flex-1 flex-col">
           <h2 className="text-base font-medium text-dark md:text-lg">
             {title || "Untitled Recording"}
           </h2>
@@ -101,20 +101,19 @@ const RecordedfileItemCard = ({
         </div>
       </div>
       
-      <div className="flex items-center justify-end border-t border-dark/5 p-2 sm:border-0 sm:p-0 sm:pr-4">
+      <div className="mt-auto flex items-center justify-end gap-1 border-t border-dark/5 p-2">
         <button
           onClick={handleEmailGeneration}
-          className="group rounded-full p-2 transition-colors hover:bg-primary/10"
-          title={isGeneratingEmail ? "Generating..." : "Email Report"}
+          className="flex items-center gap-1 rounded-md px-3 py-1.5 text-xs text-muted transition-colors hover:bg-primary/10 hover:text-primary"
           disabled={isGeneratingEmail}
         >
           <svg 
-            width="20" 
-            height="20" 
+            width="16" 
+            height="16" 
             viewBox="0 0 24 24" 
             fill="none" 
             xmlns="http://www.w3.org/2000/svg"
-            className={`text-muted transition-colors group-hover:text-primary ${isGeneratingEmail ? "opacity-50" : ""}`}
+            className={isGeneratingEmail ? "opacity-50" : ""}
           >
             <path 
               d="M4 4H20C21.1 4 22 4.9 22 6V18C22 19.1 21.1 20 20 20H4C2.9 20 2 19.1 2 18V6C2 4.9 2.9 4 4 4Z" 
@@ -125,23 +124,25 @@ const RecordedfileItemCard = ({
             />
             <path d="M22 6L12 13L2 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
+          {isGeneratingEmail ? "Generating..." : "Email"}
         </button>
         
         <button
           onClick={(e) => {
             e.preventDefault();
-            deleteNote({ id: _id });
+            if (confirm("Are you sure you want to delete this recording?")) {
+              deleteNote({ id: _id });
+              toast.success("Recording deleted");
+            }
           }}
-          className="group rounded-full p-2 transition-colors hover:bg-primary/10"
-          title="Delete recording"
+          className="flex items-center gap-1 rounded-md px-3 py-1.5 text-xs text-muted transition-colors hover:bg-primary/10 hover:text-primary"
         >
           <svg 
-            width="20" 
-            height="20" 
+            width="16" 
+            height="16" 
             viewBox="0 0 24 24" 
             fill="none" 
             xmlns="http://www.w3.org/2000/svg"
-            className="text-muted transition-colors group-hover:text-primary"
           >
             <path 
               d="M3 6H5H21" 
@@ -158,6 +159,7 @@ const RecordedfileItemCard = ({
               strokeLinejoin="round"
             />
           </svg>
+          Delete
         </button>
       </div>
     </Link>

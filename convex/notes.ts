@@ -101,6 +101,7 @@ export const getNotes = queryWithUser({
     const notes = await ctx.db
       .query('notes')
       .withIndex('by_userId', (q) => q.eq('userId', userId))
+      .order('desc')
       .collect();
 
     const results = Promise.all(
