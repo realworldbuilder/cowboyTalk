@@ -6,6 +6,7 @@ import {
 } from './_generated/server';
 import { v } from 'convex/values';
 import { internal } from './_generated/api';
+import { api } from './_generated/api';
 import { z } from 'zod';
 import { actionWithUser } from './utils';
 import Instructor from '@instructor-ai/instructor';
@@ -458,28 +459,20 @@ export const generateEmail = actionWithUser({
   handler: async (ctx, args): Promise<string> => {
     const { noteId, recipientName, recipientEmail, senderName, includeAttachments } = args;
     
-    // Get note directly - we're in an action so we can use ctx.db
-    const db = (ctx as any).db;
-    const note = await db.get(noteId);
+    // Use the structured API to get note information
+    const note = await ctx.runQuery(api.notes.getNote, { id: noteId });
     
-    if (!note) {
+    if (!note || !note.note) {
       throw new Error('Note not found');
     }
     
-    // Also verify this is the user's note
-    if (note.userId !== ctx.userId) {
-      throw new Error('Not authorized to access this note');
-    }
-    
-    // Get action items for this note
-    const actionItems = await db
-      .query("actionItems")
-      .withIndex("by_noteId", (q: any) => q.eq("noteId", noteId))
-      .collect();
+    // We already checked authorization in getNote query
+    const noteData = note.note;
+    const actionItems = note.actionItems || [];
     
     // Prepare the context data - use default values if not provided
     const emailContext = {
-      note,
+      note: noteData,
       actionItems,
       recipient: {
         name: recipientName || "Team Member",
