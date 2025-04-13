@@ -5,6 +5,8 @@ import { usePreloadedQueryWithAuth } from '@/lib/hooks';
 import { Preloaded, useMutation } from 'convex/react';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
+import Pagination from '@/components/ui/Pagination';
+import { useState } from 'react';
 
 export default function ActionItemsPage({
   preloadedItems,
@@ -13,11 +15,25 @@ export default function ActionItemsPage({
 }) {
   const actionItems = usePreloadedQueryWithAuth(preloadedItems);
   const mutateActionItems = useMutation(api.notes.removeActionItem);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   function removeActionItem(actionId: any) {
     // Trigger a mutation to remove the item from the list
     mutateActionItems({ id: actionId });
   }
+
+  // Calculate pagination
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = actionItems?.slice(indexOfFirstItem, indexOfLastItem) || [];
+  
+  // Change page
+  const handlePageChange = (pageNumber: number) => {
+    setCurrentPage(pageNumber);
+    // Scroll to top of list when page changes
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   return (
     <div className="min-h-[100vh] bg-light">
@@ -30,7 +46,7 @@ export default function ActionItemsPage({
         </p>
       </div>
       <div className="mx-auto mt-4 w-full max-w-[800px] px-4 md:mt-6">
-        {actionItems?.map((item, idx) => (
+        {currentItems.map((item, idx) => (
           <div
             className="border-t border-[#00000015] py-2"
             key={idx}
@@ -75,6 +91,16 @@ export default function ActionItemsPage({
               </Link>
             </div>
           </div>
+        )}
+        
+        {/* Pagination */}
+        {actionItems && actionItems.length > 0 && (
+          <Pagination
+            totalItems={actionItems.length}
+            itemsPerPage={itemsPerPage}
+            currentPage={currentPage}
+            onPageChange={handlePageChange}
+          />
         )}
       </div>
     </div>

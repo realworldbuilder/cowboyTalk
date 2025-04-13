@@ -7,6 +7,7 @@ import { Preloaded, useAction } from 'convex/react';
 import { FunctionReturnType } from 'convex/server';
 import Link from 'next/link';
 import { useState } from 'react';
+import Pagination from '@/components/ui/Pagination';
 
 export default function DashboardHomePage({
   preloadedNotes,
@@ -17,11 +18,15 @@ export default function DashboardHomePage({
   const [searchQuery, setSearchQuery] = useState('');
   const [relevantNotes, setRelevantNotes] =
     useState<FunctionReturnType<typeof api.notes.getNotes>>();
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   const performMyAction = useAction(api.together.similarNotes);
 
   const handleSearch = async (e: any) => {
     e.preventDefault();
+    // Reset to first page when searching
+    setCurrentPage(1);
 
     if (searchQuery === '') {
       setRelevantNotes(undefined);
@@ -39,6 +44,18 @@ export default function DashboardHomePage({
   };
 
   const finalNotes = relevantNotes ?? allNotes;
+  
+  // Calculate pagination
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = finalNotes?.slice(indexOfFirstItem, indexOfLastItem) || [];
+  
+  // Change page
+  const handlePageChange = (pageNumber: number) => {
+    setCurrentPage(pageNumber);
+    // Scroll to top of list when page changes
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   return (
     <div suppressHydrationWarning={true} className="w-full pb-16 pt-4">
@@ -95,9 +112,19 @@ export default function DashboardHomePage({
         <div className="mx-auto max-w-3xl">
           {finalNotes && finalNotes.length > 0 ? (
             <div className="space-y-2 md:space-y-3">
-              {finalNotes.map((item, index) => (
+              {currentItems.map((item, index) => (
                 <RecordedfileItemCard {...item} key={index} />
               ))}
+              
+              {/* Pagination */}
+              {finalNotes.length > itemsPerPage && (
+                <Pagination
+                  totalItems={finalNotes.length}
+                  itemsPerPage={itemsPerPage}
+                  currentPage={currentPage}
+                  onPageChange={handlePageChange}
+                />
+              )}
             </div>
           ) : (
             <div className="flex min-h-[40vh] flex-col items-center justify-center">
