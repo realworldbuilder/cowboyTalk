@@ -498,7 +498,7 @@ export const generateEmail = actionWithUser({
           - Use direct, straightforward language like a construction professional would
           - Format the body with clear sections and bullet points where appropriate
           - Include key action items from the report as clear directives
-          - Close with a standard professional sign-off (like "Best regards" or "Thanks")
+          - Close with a professional sign-off followed by the sender's name (e.g., "Best regards," or "Thanks," followed by the sender's name on a new line)
           
           # TONE AND STYLE
           - Use appropriate construction terminology when relevant
@@ -522,7 +522,8 @@ export const generateEmail = actionWithUser({
           Provide the complete email as plain text with:
           - Begin the email body directly with the "Howdy," greeting
           - Include appropriate line breaks for readability
-          - End with a professional signature`
+          - End with a professional signature followed by the sender's name (from the context provided)
+          - IMPORTANT: Always include the sender's name at the end of the email`
         },
         {
           role: 'user',
