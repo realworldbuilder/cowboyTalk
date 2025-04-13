@@ -493,11 +493,11 @@ export const generateEmail = actionWithUser({
           Your task is to compose an email that clearly communicates the key information from a construction report.
 
           # EMAIL STRUCTURE GUIDELINES
-          - Begin with a professional greeting
+          - Start the email body with "Howdy [recipient name],"
           - Keep a professional tone throughout
           - Use direct, straightforward language like a construction professional would
           - Format the body with clear sections and bullet points where appropriate
-          - Include key action items from the report
+          - Include key action items from the report as clear directives
           - Close with a standard professional sign-off (like "Best regards" or "Thanks")
           
           # TONE AND STYLE
@@ -505,6 +505,7 @@ export const generateEmail = actionWithUser({
           - Be direct and to the point, like a site foreman would be
           - Keep it professional with a straightforward style
           - Emphasize safety concerns and critical issues appropriately
+          - Frame content as notices with clear directives when appropriate
           
           # FOR DIFFERENT REPORT TYPES
           - SAFETY: Emphasize urgency of safety issues, clear action requirements
@@ -520,10 +521,10 @@ export const generateEmail = actionWithUser({
           
           # RESPONSE FORMAT
           Provide the complete email as plain text with:
-          - Subject: [THE EMAIL SUBJECT] as the first line
-          - Skip a line after subject
-          - Body with appropriate line breaks
-          - No placeholder text - everything should be specific to this report`
+          - First generate a subject line but do not include it in the email body
+          - Begin the email body directly with the "Howdy" greeting
+          - Include appropriate line breaks for readability
+          - End with a professional signature`
         },
         {
           role: 'user',
