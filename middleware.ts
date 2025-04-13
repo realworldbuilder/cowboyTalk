@@ -8,6 +8,12 @@ export default authMiddleware({
   debug: true,
 });
 
+// Use the matcher pattern that avoids known issues with Edge runtime
 export const config = {
-  matcher: ['/((?!.+\\.[\\w]+$|_next).*)', '/', '/(api|trpc)(.*)'],
+  matcher: [
+    // Required for Clerk authentication
+    '/((?!.*\\..*|_next).*)',
+    // Exclude static files and api routes that don't need auth
+    '/(api|trpc)(.*)'
+  ],
 };
