@@ -3,7 +3,15 @@ import { useState } from 'react';
 import { useMutation } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import toast, { Toaster } from 'react-hot-toast';
-import { Doc } from '@/convex/_generated/dataModel';
+import { Doc, Id } from '@/convex/_generated/dataModel';
+
+// Import the report components from RecordingDesktop
+import { 
+  SafetyReport, 
+  QualityReport, 
+  EquipmentReport, 
+  RFIReport 
+} from './RecordingDesktop';
 
 export default function RecordingMobile({
   note,
@@ -12,24 +20,55 @@ export default function RecordingMobile({
   note: Doc<'notes'>;
   actionItems: Doc<'actionItems'>[];
 }) {
-  const { summary, transcription, title, _creationTime } = note;
-  const [transcriptOpen, setTranscriptOpen] = useState<boolean>(true);
-  const [summaryOpen, setSummaryOpen] = useState<boolean>(false);
-  const [actionItemOpen, setActionItemOpen] = useState<boolean>(false);
+  const { 
+    title, 
+    transcription, 
+    summary,
+    reportType,
+    safetyDetails,
+    qualityDetails,
+    equipmentDetails,
+    rfiDetails 
+  } = note;
+  const [transcriptOpen, setTranscriptOpen] = useState(true);
+  const [summaryOpen, setSummaryOpen] = useState(false);
+  const [actionItemOpen, setActionItemOpen] = useState(false);
 
   const mutateActionItems = useMutation(api.notes.removeActionItem);
 
-  function removeActionItem(actionId: any) {
-    // Trigger a mutation to remove the item from the list
+  function removeActionItem(actionId: Id<'actionItems'>) {
     mutateActionItems({ id: actionId });
   }
 
+  // Component to render the appropriate report details based on type
+  const ReportDetails = () => {
+    switch (reportType) {
+      case 'SAFETY':
+        return <SafetyReport details={safetyDetails} />;
+      case 'QUALITY':
+        return <QualityReport details={qualityDetails} />;
+      case 'EQUIPMENT':
+        return <EquipmentReport details={equipmentDetails} />;
+      case 'RFI':
+        return <RFIReport details={rfiDetails} />;
+      default:
+        return null;
+    }
+  };
+
   return (
     <div className="md:hidden">
-      <div className="max-width my-5 flex items-center justify-center">
+      <div className="max-width my-5 flex flex-col items-center justify-center">
         <h1 className="leading text-center text-xl font-medium leading-[114.3%] tracking-[-0.75px] text-dark md:text-[35px] lg:text-[43px]">
           {title ?? 'Untitled Note'}
         </h1>
+        {reportType && (
+          <div className="mt-2 flex justify-center">
+            <span className="rounded-full bg-dark px-3 py-1 text-sm text-light">
+              {reportType} REPORT
+            </span>
+          </div>
+        )}
       </div>
       <div className="grid w-full grid-cols-3 ">
         <button
@@ -77,7 +116,8 @@ export default function RecordingMobile({
         )}
         {summaryOpen && (
           <div className="relative mt-2 min-h-[70vh] w-full px-4 py-3 text-justify font-light">
-            {summary}
+            <div>{summary}</div>
+            <ReportDetails />
           </div>
         )}
         {actionItemOpen && (
@@ -89,28 +129,18 @@ export default function RecordingMobile({
                   className="border-[#00000033] py-1 md:border-t-[1px] md:py-2"
                   key={idx}
                 >
-                  <div className="flex w-full justify-center">
-                    <div className="group w-full items-center rounded py-2 text-lg font-[300] text-dark transition-colors duration-300 checked:text-gray-300 hover:bg-gray-100 md:text-2xl">
-                      <div className="flex items-center">
-                        <input
-                          onChange={(e) => {
-                            if (e.target.checked) {
-                              removeActionItem(item._id);
-                              toast.success('1 task completed.');
-                            }
-                          }}
-                          type="checkbox"
-                          checked={false}
-                          className="mr-4 h-5 w-5 cursor-pointer rounded-sm border-2 border-gray-300"
-                        />
-                        <label className="">{item?.task}</label>
-                      </div>
-                      <div className="flex justify-between md:mt-2">
-                        <p className="ml-9 text-[15px] font-[300] leading-[249%] tracking-[-0.6px] text-dark opacity-60 md:inline-block md:text-xl lg:text-xl">
-                          {new Date(Number(_creationTime)).toLocaleDateString()}
-                        </p>
-                      </div>
-                    </div>
+                  <div className="flex items-center justify-between">
+                    <p className=" text-[16px] font-[300] leading-[114.3%] tracking-[-0.4px] text-dark md:text-xl lg:text-2xl">
+                      {item.task}
+                    </p>
+                    <button
+                      onClick={() => {
+                        removeActionItem(item._id);
+                      }}
+                      className="rounded-[4px] bg-dark px-4 py-[6px] text-sm text-light"
+                    >
+                      Delete
+                    </button>
                   </div>
                 </div>
               ))}

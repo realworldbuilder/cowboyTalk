@@ -25,6 +25,8 @@ const client = Instructor({
 });
 
 const NoteSchema = z.object({
+  reportType: z.enum(['SAFETY', 'QUALITY', 'EQUIPMENT', 'RFI'])
+    .describe('The type of report detected from the transcript'),
   title: z
     .string()
     .describe('Short descriptive title of what the voice message is about'),
@@ -39,6 +41,27 @@ const NoteSchema = z.object({
     .describe(
       'A list of action items from the voice note, short and to the point. Make sure all action item lists are fully resolved if they are nested',
     ),
+  // Fields specific to each report type
+  safetyDetails: z.object({
+    incidents: z.array(z.string()).optional(),
+    hazards: z.array(z.string()).optional(),
+    ppeCompliance: z.string().optional(),
+  }).optional(),
+  qualityDetails: z.object({
+    controlPoints: z.array(z.string()).optional(),
+    nonConformanceIssues: z.array(z.string()).optional(),
+    correctiveActions: z.array(z.string()).optional(),
+  }).optional(),
+  equipmentDetails: z.object({
+    status: z.string().optional(),
+    operatingHours: z.string().optional(),
+    mechanicalIssues: z.array(z.string()).optional(),
+  }).optional(),
+  rfiDetails: z.object({
+    questions: z.array(z.string()).optional(),
+    clarifications: z.array(z.string()).optional(),
+    documentReferences: z.array(z.string()).optional(),
+  }).optional(),
 });
 
 export const chat = internalAction({
@@ -50,13 +73,28 @@ export const chat = internalAction({
     const { transcript } = args;
 
     try {
-      // Using a different approach without JSON_SCHEMA mode
       const response = await togetherai.chat.completions.create({
         messages: [
           {
             role: 'system',
             content:
-              'The following is a transcript of a voice message. Extract a title, summary, and action items from it and answer in JSON in this format: {title: string, summary: string, actionItems: [string, string, ...]}',
+              `You are an AI specialized in construction report analysis. Analyze the transcript to:
+              
+              1. Determine the report type from: SAFETY, QUALITY, EQUIPMENT, or RFI
+              2. Extract relevant information based on the report type
+              
+              For each report type, extract:
+              - SAFETY: incidents, hazards, PPE compliance
+              - QUALITY: quality control points, non-conformance issues, corrective actions
+              - EQUIPMENT: equipment status, operating hours, mechanical issues
+              - RFI: questions, technical clarifications, document references
+              
+              Return a JSON object with:
+              - reportType: "SAFETY", "QUALITY", "EQUIPMENT", or "RFI"
+              - title: Short descriptive title
+              - summary: Brief summary (max 500 chars)
+              - actionItems: Array of action items
+              - Relevant details object based on report type (safetyDetails, qualityDetails, equipmentDetails, or rfiDetails)`,
           },
           { role: 'user', content: transcript },
         ],
@@ -78,21 +116,32 @@ export const chat = internalAction({
       }
 
       const { 
+        reportType = 'RFI', 
         title = 'Untitled Note', 
         summary = 'Summary failed to generate', 
-        actionItems = [] 
+        actionItems = [],
+        safetyDetails,
+        qualityDetails,
+        equipmentDetails,
+        rfiDetails
       } = parsedResponse;
 
       await ctx.runMutation(internal.together.saveSummary, {
         id: args.id,
+        reportType,
         summary,
         actionItems,
         title,
+        safetyDetails,
+        qualityDetails,
+        equipmentDetails,
+        rfiDetails
       });
     } catch (e) {
       console.error('Error extracting from voice message', e);
       await ctx.runMutation(internal.together.saveSummary, {
         id: args.id,
+        reportType: 'RFI',
         summary: 'Summary failed to generate',
         actionItems: [],
         title: 'Title',
@@ -115,16 +164,53 @@ export const getTranscript = internalQuery({
 export const saveSummary = internalMutation({
   args: {
     id: v.id('notes'),
+    reportType: v.string(),
     summary: v.string(),
     title: v.string(),
     actionItems: v.array(v.string()),
+    safetyDetails: v.optional(v.object({
+      incidents: v.optional(v.array(v.string())),
+      hazards: v.optional(v.array(v.string())),
+      ppeCompliance: v.optional(v.string()),
+    })),
+    qualityDetails: v.optional(v.object({
+      controlPoints: v.optional(v.array(v.string())),
+      nonConformanceIssues: v.optional(v.array(v.string())),
+      correctiveActions: v.optional(v.array(v.string())),
+    })),
+    equipmentDetails: v.optional(v.object({
+      status: v.optional(v.string()),
+      operatingHours: v.optional(v.string()),
+      mechanicalIssues: v.optional(v.array(v.string())),
+    })),
+    rfiDetails: v.optional(v.object({
+      questions: v.optional(v.array(v.string())),
+      clarifications: v.optional(v.array(v.string())),
+      documentReferences: v.optional(v.array(v.string())),
+    })),
   },
   handler: async (ctx, args) => {
-    const { id, summary, actionItems, title } = args;
+    const { 
+      id, 
+      reportType, 
+      summary, 
+      actionItems, 
+      title,
+      safetyDetails,
+      qualityDetails,
+      equipmentDetails,
+      rfiDetails
+    } = args;
+    
     await ctx.db.patch(id, {
-      summary: summary,
-      title: title,
+      reportType,
+      summary,
+      title,
       generatingTitle: false,
+      safetyDetails,
+      qualityDetails,
+      equipmentDetails,
+      rfiDetails
     });
 
     let note = await ctx.db.get(id);

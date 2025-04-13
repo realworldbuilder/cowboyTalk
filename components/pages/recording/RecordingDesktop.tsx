@@ -5,42 +5,216 @@ import { useMutation } from 'convex/react';
 import Link from 'next/link';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
+import { Id } from '@/convex/_generated/dataModel';
 
+// Helper components for displaying report-specific details
+export const SafetyReport = ({ details }: { details: any }) => {
+  if (!details) return null;
+  return (
+    <div className="mt-4 border-t border-gray-200 pt-4">
+      <h3 className="mb-2 text-lg font-semibold">Safety Details</h3>
+      {details.incidents && details.incidents.length > 0 && (
+        <div className="mb-3">
+          <h4 className="font-medium">Incidents:</h4>
+          <ul className="ml-5 list-disc">
+            {details.incidents.map((item: string, idx: number) => (
+              <li key={idx}>{item}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+      {details.hazards && details.hazards.length > 0 && (
+        <div className="mb-3">
+          <h4 className="font-medium">Hazards:</h4>
+          <ul className="ml-5 list-disc">
+            {details.hazards.map((item: string, idx: number) => (
+              <li key={idx}>{item}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+      {details.ppeCompliance && (
+        <div className="mb-3">
+          <h4 className="font-medium">PPE Compliance:</h4>
+          <p>{details.ppeCompliance}</p>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export const QualityReport = ({ details }: { details: any }) => {
+  if (!details) return null;
+  return (
+    <div className="mt-4 border-t border-gray-200 pt-4">
+      <h3 className="mb-2 text-lg font-semibold">Quality Inspection Details</h3>
+      {details.controlPoints && details.controlPoints.length > 0 && (
+        <div className="mb-3">
+          <h4 className="font-medium">Control Points:</h4>
+          <ul className="ml-5 list-disc">
+            {details.controlPoints.map((item: string, idx: number) => (
+              <li key={idx}>{item}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+      {details.nonConformanceIssues && details.nonConformanceIssues.length > 0 && (
+        <div className="mb-3">
+          <h4 className="font-medium">Non-Conformance Issues:</h4>
+          <ul className="ml-5 list-disc">
+            {details.nonConformanceIssues.map((item: string, idx: number) => (
+              <li key={idx}>{item}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+      {details.correctiveActions && details.correctiveActions.length > 0 && (
+        <div className="mb-3">
+          <h4 className="font-medium">Corrective Actions:</h4>
+          <ul className="ml-5 list-disc">
+            {details.correctiveActions.map((item: string, idx: number) => (
+              <li key={idx}>{item}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export const EquipmentReport = ({ details }: { details: any }) => {
+  if (!details) return null;
+  return (
+    <div className="mt-4 border-t border-gray-200 pt-4">
+      <h3 className="mb-2 text-lg font-semibold">Equipment Details</h3>
+      {details.status && (
+        <div className="mb-3">
+          <h4 className="font-medium">Status:</h4>
+          <p>{details.status}</p>
+        </div>
+      )}
+      {details.operatingHours && (
+        <div className="mb-3">
+          <h4 className="font-medium">Operating Hours:</h4>
+          <p>{details.operatingHours}</p>
+        </div>
+      )}
+      {details.mechanicalIssues && details.mechanicalIssues.length > 0 && (
+        <div className="mb-3">
+          <h4 className="font-medium">Mechanical Issues:</h4>
+          <ul className="ml-5 list-disc">
+            {details.mechanicalIssues.map((item: string, idx: number) => (
+              <li key={idx}>{item}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export const RFIReport = ({ details }: { details: any }) => {
+  if (!details) return null;
+  return (
+    <div className="mt-4 border-t border-gray-200 pt-4">
+      <h3 className="mb-2 text-lg font-semibold">RFI Details</h3>
+      {details.questions && details.questions.length > 0 && (
+        <div className="mb-3">
+          <h4 className="font-medium">Questions:</h4>
+          <ul className="ml-5 list-disc">
+            {details.questions.map((item: string, idx: number) => (
+              <li key={idx}>{item}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+      {details.clarifications && details.clarifications.length > 0 && (
+        <div className="mb-3">
+          <h4 className="font-medium">Clarifications:</h4>
+          <ul className="ml-5 list-disc">
+            {details.clarifications.map((item: string, idx: number) => (
+              <li key={idx}>{item}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+      {details.documentReferences && details.documentReferences.length > 0 && (
+        <div className="mb-3">
+          <h4 className="font-medium">Document References:</h4>
+          <ul className="ml-5 list-disc">
+            {details.documentReferences.map((item: string, idx: number) => (
+              <li key={idx}>{item}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// Main component
 export default function RecordingDesktop({
   note,
   actionItems,
-}: {
-  note: Doc<'notes'>;
-  actionItems: Doc<'actionItems'>[];
-}) {
+}: any) {
   const {
-    generatingActionItems,
-    generatingTitle,
+    title,
     summary,
     transcription,
-    title,
+    _id,
     _creationTime,
+    generatingTitle,
+    generatingActionItems,
+    reportType,
+    safetyDetails,
+    qualityDetails,
+    equipmentDetails,
+    rfiDetails
   } = note;
-  const [originalIsOpen, setOriginalIsOpen] = useState<boolean>(true);
+  const [originalIsOpen, setOriginalIsOpen] = useState(true);
 
   const mutateActionItems = useMutation(api.notes.removeActionItem);
 
-  function removeActionItem(actionId: any) {
-    // Trigger a mutation to remove the item from the list
+  function removeActionItem(actionId: Id<'actionItems'>) {
     mutateActionItems({ id: actionId });
   }
+
+  // Component to render the appropriate report details based on type
+  const ReportDetails = () => {
+    switch (reportType) {
+      case 'SAFETY':
+        return <SafetyReport details={safetyDetails} />;
+      case 'QUALITY':
+        return <QualityReport details={qualityDetails} />;
+      case 'EQUIPMENT':
+        return <EquipmentReport details={equipmentDetails} />;
+      case 'RFI':
+        return <RFIReport details={rfiDetails} />;
+      default:
+        return null;
+    }
+  };
 
   return (
     <div className="hidden md:block">
       <div className="max-width mt-5 flex items-center justify-between">
         <div />
-        <h1
-          className={`leading text-center text-xl font-medium leading-[114.3%] tracking-[-0.75px] text-dark md:text-[35px] lg:text-[43px] ${
-            generatingTitle && 'animate-pulse'
-          }`}
-        >
-          {generatingTitle ? 'Generating Title...' : title ?? 'Untitled Note'}
-        </h1>
+        <div className="text-center">
+          <h1
+            className={`leading text-center text-xl font-medium leading-[114.3%] tracking-[-0.75px] text-dark md:text-[35px] lg:text-[43px] ${
+              generatingTitle && 'animate-pulse'
+            }`}
+          >
+            {generatingTitle ? 'Generating Title...' : title ?? 'Untitled Note'}
+          </h1>
+          {reportType && (
+            <div className="mt-2 flex justify-center">
+              <span className="rounded-full bg-dark px-3 py-1 text-sm text-light">
+                {reportType} REPORT
+              </span>
+            </div>
+          )}
+        </div>
         <div className="flex items-center justify-center">
           <p className="text-lg opacity-80">
             {formatTimestamp(Number(_creationTime))}
@@ -85,7 +259,14 @@ export default function RecordingDesktop({
       <div className="grid h-full w-full grid-cols-2 px-[30px] lg:px-[45px]">
         <div className="relative min-h-[70vh] w-full border-r px-5 py-3 text-justify text-xl font-[300] leading-[114.3%] tracking-[-0.6px] lg:text-2xl">
           {transcription ? (
-            <div className="">{originalIsOpen ? transcription : summary}</div>
+            <div className="">
+              {originalIsOpen ? transcription : (
+                <>
+                  <div>{summary}</div>
+                  <ReportDetails />
+                </>
+              )}
+            </div>
           ) : (
             // Loading state for transcript
             <ul className="animate-pulse space-y-3">
@@ -98,30 +279,13 @@ export default function RecordingDesktop({
           )}
         </div>
         <div className="relative mx-auto mt-[27px] w-full max-w-[900px] px-5 md:mt-[45px]">
-          {generatingActionItems
+          {note?.generatingActionItems
             ? [0, 1, 3].map((item: any, idx: number) => (
                 <div
                   className="animate-pulse border-[#00000033] py-1 md:border-t-[1px] md:py-2"
                   key={idx}
                 >
-                  <div className="flex w-full justify-center">
-                    <div className="group w-full items-center rounded p-2 text-lg font-[300] text-dark transition-colors duration-300 checked:text-gray-300 hover:bg-gray-100 md:text-2xl">
-                      <div className="flex items-center">
-                        <input
-                          disabled
-                          type="checkbox"
-                          checked={false}
-                          className="mr-4 h-5 w-5 cursor-pointer rounded-sm border-2 border-gray-300"
-                        />
-                        <label className="h-5 w-full rounded-full bg-gray-200" />
-                      </div>
-                      <div className="flex justify-between md:mt-2">
-                        <p className="ml-9 text-[15px] font-[300] leading-[249%] tracking-[-0.6px] text-dark opacity-60 md:inline-block md:text-xl lg:text-xl">
-                          {new Date(Number(_creationTime)).toLocaleDateString()}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
+                  <div className="mt-2 h-6 rounded-full bg-gray-200 dark:bg-gray-700"></div>
                 </div>
               ))
             : actionItems?.map((item: any, idx: number) => (
@@ -129,28 +293,18 @@ export default function RecordingDesktop({
                   className="border-[#00000033] py-1 md:border-t-[1px] md:py-2"
                   key={idx}
                 >
-                  <div className="flex w-full justify-center">
-                    <div className="group w-full items-center rounded p-2 text-lg font-[300] text-dark transition-colors duration-300 checked:text-gray-300 hover:bg-gray-100 md:text-2xl">
-                      <div className="flex items-center">
-                        <input
-                          onChange={(e) => {
-                            if (e.target.checked) {
-                              removeActionItem(item._id);
-                              toast.success('1 task completed.');
-                            }
-                          }}
-                          type="checkbox"
-                          checked={false}
-                          className="mr-4 h-5 w-5 cursor-pointer rounded-sm border-2 border-gray-300"
-                        />
-                        <label className="">{item?.task}</label>
-                      </div>
-                      <div className="flex justify-between md:mt-2">
-                        <p className="ml-9 text-[15px] font-[300] leading-[249%] tracking-[-0.6px] text-dark opacity-60 md:inline-block md:text-xl lg:text-xl">
-                          {new Date(Number(_creationTime)).toLocaleDateString()}
-                        </p>
-                      </div>
-                    </div>
+                  <div className="flex items-center justify-between" key={idx}>
+                    <p className=" text-[16px] font-[300] leading-[114.3%] tracking-[-0.4px] text-dark md:text-xl lg:text-2xl">
+                      {item.task}
+                    </p>
+                    <button
+                      onClick={() => {
+                        removeActionItem(item._id);
+                      }}
+                      className="rounded-[4px] bg-dark px-4 py-[6px] text-sm text-light"
+                    >
+                      Delete
+                    </button>
                   </div>
                 </div>
               ))}

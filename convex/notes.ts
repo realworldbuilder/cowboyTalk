@@ -22,6 +22,7 @@ export const createNote = mutationWithUser({
       userId,
       audioFileId: storageId,
       audioFileUrl: fileUrl,
+      reportType: 'RFI',
       generatingTranscript: true,
       generatingTitle: true,
       generatingActionItems: true,
