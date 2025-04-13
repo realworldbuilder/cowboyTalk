@@ -5,23 +5,21 @@ const Banner = () => {
     <section className="w-full py-16 md:py-24">
       <div className="max-width flex flex-col items-center justify-center">
         <a
-          href="https://togetherai.link"
+          href="mailto:foundervisions@proton.me"
           target="_blank"
           rel="noreferrer"
           className="mb-5 rounded-full border border-muted/30 px-4 py-1 text-sm text-muted transition duration-300 hover:border-muted/50 hover:text-dark sm:text-base"
         >
-          Powered by <span className="font-medium">Together.ai </span>and{' '}
-          <span className="font-medium">Convex</span>
+          Invite only for now. Sorry, partner.
         </a>
         <h1 className="text-center text-4xl font-medium tracking-tight text-dark md:text-5xl lg:text-6xl">
-          AI-Powered Voice <br className="hidden md:inline-block" />
-          Note Taking
+          AI-Power for Construction<br className="hidden md:inline-block" />
+          Superintendents
         </h1>
         <p className="mt-6 max-w-2xl text-center text-lg font-light tracking-tight text-dark/80 md:mt-8 md:text-xl">
           Cowboy Talk seamlessly converts your voice notes into{' '}
           <span className="font-medium text-primary">
-            organized summaries
-          </span>{' '}
+            organized directives</span> or <span className="font-medium text-primary">constractual notices</span>{' '}
           and <span className="font-medium text-primary">clear action items</span> using AI.
         </p>
         <Link
