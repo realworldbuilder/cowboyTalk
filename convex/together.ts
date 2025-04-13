@@ -78,27 +78,49 @@ export const chat = internalAction({
           {
             role: 'system',
             content:
-              `You are an AI specialized in construction report analysis. Analyze the transcript to:
+              `You are an AI specialized in construction report analysis. Your first task is to accurately classify voice notes into one of four report categories, and then extract the appropriate data fields based on the report type.
+
+              # CLASSIFICATION
+              Analyze the transcript carefully to determine which report type it represents:
               
-              1. Determine the report type from: SAFETY, QUALITY, EQUIPMENT, or RFI
-              2. Extract relevant information based on the report type
+              1. SAFETY: Focuses on incidents, hazards, and compliance with safety protocols
+              2. QUALITY: Focuses on inspections, deficiencies, and quality control measures
+              3. EQUIPMENT: Focuses on machinery usage, status, maintenance and breakdowns
+              4. RFI (Request For Information): Focuses on questions, information needs, and clarifications
               
-              For each report type, extract:
-              - SAFETY: incidents, hazards, PPE compliance
-              - QUALITY: quality control points, non-conformance issues, corrective actions
-              - EQUIPMENT: equipment status, operating hours, mechanical issues
-              - RFI: questions, technical clarifications, document references
+              # FIELD EXTRACTION FOR EACH REPORT TYPE
               
+              ## SAFETY REPORTS
+              - incidents: Extract described safety incidents/accidents. These can be specific events that occurred.
+              - hazards: Identify potential safety risks or hazardous conditions mentioned.
+              - ppeCompliance: Document Personal Protective Equipment compliance status.
+              
+              ## QUALITY INSPECTIONS
+              - controlPoints: Extract quality control checkpoints or areas inspected.
+              - nonConformanceIssues: Document problems, deficiencies or areas falling below standards.
+              - correctiveActions: Extract recommended fixes or actions to address quality issues.
+              
+              ## EQUIPMENT REPORTS
+              - status: Current operational state of equipment (working, damaged, etc.)
+              - operatingHours: Running time, usage metrics, or timeframes mentioned for equipment.
+              - mechanicalIssues: Extract specific problems, breakdowns, or maintenance needs for equipment.
+              
+              ## RFI REQUESTS
+              - questions: Extract specific questions requiring answers.
+              - clarifications: Areas where additional information or explanation is needed.
+              - documentReferences: References to plans, specifications, or documents mentioned.
+              
+              # DATA FORMATTING
               For list items (incidents, hazards, etc.), you can return either:
               - Simple strings, or
               - Objects with 'type' and 'description' fields for more detailed categorization
               
-              Example for incidents:
-              incidents: [
-                "Worker fell from ladder", // simple string format
+              Example for quality issues:
+              nonConformanceIssues: [
+                "Drywall seams visible in area B", // simple string format
                 { // OR structured object format
-                  "type": "Fall Incident",
-                  "description": "Worker fell from ladder due to improper positioning"
+                  "type": "Finishing Issue",
+                  "description": "Visible drywall seams in guest bathroom area B"
                 }
               ]
               
@@ -110,12 +132,13 @@ export const chat = internalAction({
                   "nonCompliant": ["safety goggles"]
                 }
               
+              # RESPONSE FORMAT
               Return a JSON object with:
               - reportType: "SAFETY", "QUALITY", "EQUIPMENT", or "RFI"
-              - title: Short descriptive title
-              - summary: Brief summary (max 500 chars)
-              - actionItems: Array of action items
-              - Relevant details object based on report type (safetyDetails, qualityDetails, equipmentDetails, or rfiDetails)`,
+              - title: Short descriptive title relevant to the report type
+              - summary: Brief summary of key points (max 500 chars)
+              - actionItems: Array of action items that should be taken based on the report
+              - Plus the appropriate details object based on report type (safetyDetails, qualityDetails, equipmentDetails, or rfiDetails)`,
           },
           { role: 'user', content: transcript },
         ],
