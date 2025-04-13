@@ -191,12 +191,12 @@ export default function RecordingMobile({
                   View All Action Items
                 </Link>
                 <button
-                  className="rounded-[7px] bg-blue-600 px-5 py-[15px] text-[17px] leading-[79%] tracking-[-0.75px] text-light md:text-xl lg:px-[37px]"
+                  className="rounded-[7px] bg-dark px-5 py-[15px] text-[17px] leading-[79%] tracking-[-0.75px] text-light md:text-xl lg:px-[37px]"
                   style={{ boxShadow: ' 0px 4px 4px 0px rgba(0, 0, 0, 0.25)' }}
                   onClick={handleEmailGeneration}
                   disabled={isGeneratingEmail}
                 >
-                  {isGeneratingEmail ? 'Generating Email...' : 'Email Report'}
+                  {isGeneratingEmail ? 'Generating...' : 'Email Report'}
                 </button>
               </div>
             </div>{' '}
