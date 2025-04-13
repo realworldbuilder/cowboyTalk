@@ -72,73 +72,66 @@ export const chat = internalAction({
   handler: async (ctx, args) => {
     const { transcript } = args;
 
+    // Mark note as processing to prevent premature display
+    await ctx.runMutation(internal.together.markProcessing, {
+      id: args.id,
+    });
+
     try {
       const response = await togetherai.chat.completions.create({
         messages: [
           {
             role: 'system',
             content:
-              `You are an AI specialized in construction report analysis. Your first task is to accurately classify voice notes into one of four report categories, and then extract the appropriate data fields based on the report type.
+              `You are an AI specialized in construction report analysis. Your task is to accurately classify and structure voice notes into one of four report categories, extracting appropriate data fields based on the report type.
 
-              # CLASSIFICATION
-              Analyze the transcript carefully to determine which report type it represents:
+              # CLASSIFICATION RULES
+              - Analyze the transcript carefully before making a classification
+              - Only classify if you have high confidence in the report type
+              - If the report contains mixed content, choose the most dominant type
+              - Default to RFI if the classification is unclear
               
-              1. SAFETY: Focuses on incidents, hazards, and compliance with safety protocols
-              2. QUALITY: Focuses on inspections, deficiencies, and quality control measures
-              3. EQUIPMENT: Focuses on machinery usage, status, maintenance and breakdowns
-              4. RFI (Request For Information): Focuses on questions, information needs, and clarifications
+              # REPORT TYPES AND REQUIRED FIELDS
               
-              # FIELD EXTRACTION FOR EACH REPORT TYPE
+              ## 1. SAFETY REPORTS
+              Required fields:
+              - incidents: List all safety incidents mentioned (leave empty array if none mentioned)
+              - hazards: List all safety hazards identified (leave empty array if none mentioned)
+              - ppeCompliance: Document PPE compliance status as a detailed string
               
-              ## SAFETY REPORTS
-              - incidents: Extract described safety incidents/accidents. These can be specific events that occurred.
-              - hazards: Identify potential safety risks or hazardous conditions mentioned.
-              - ppeCompliance: Document Personal Protective Equipment compliance status.
+              ## 2. QUALITY REPORTS
+              Required fields:
+              - controlPoints: List specific quality control checkpoints mentioned
+              - nonConformanceIssues: Document all quality problems or deficiencies
+              - correctiveActions: List all recommended fixes or corrective measures
               
-              ## QUALITY INSPECTIONS
-              - controlPoints: Extract quality control checkpoints or areas inspected.
-              - nonConformanceIssues: Document problems, deficiencies or areas falling below standards.
-              - correctiveActions: Extract recommended fixes or actions to address quality issues.
+              ## 3. EQUIPMENT REPORTS
+              Required fields:
+              - status: Current operational state of equipment as a detailed string
+              - operatingHours: Running time or usage metrics as a string
+              - mechanicalIssues: List all equipment problems or maintenance needs
               
-              ## EQUIPMENT REPORTS
-              - status: Current operational state of equipment (working, damaged, etc.)
-              - operatingHours: Running time, usage metrics, or timeframes mentioned for equipment.
-              - mechanicalIssues: Extract specific problems, breakdowns, or maintenance needs for equipment.
+              ## 4. RFI (REQUEST FOR INFORMATION) REPORTS
+              Required fields:
+              - questions: List all explicit questions requiring answers
+              - clarifications: List areas needing additional information
+              - documentReferences: List references to plans, specs, or documents
               
-              ## RFI REQUESTS
-              - questions: Extract specific questions requiring answers.
-              - clarifications: Areas where additional information or explanation is needed.
-              - documentReferences: References to plans, specifications, or documents mentioned.
-              
-              # DATA FORMATTING
-              For list items (incidents, hazards, etc.), you can return either:
-              - Simple strings, or
-              - Objects with 'type' and 'description' fields for more detailed categorization
-              
-              Example for quality issues:
-              nonConformanceIssues: [
-                "Drywall seams visible in area B", // simple string format
-                { // OR structured object format
-                  "type": "Finishing Issue",
-                  "description": "Visible drywall seams in guest bathroom area B"
-                }
-              ]
-              
-              For PPE compliance in SAFETY reports, you can return either:
-              - A simple string: "All workers wearing required PPE" 
-              - OR an object with compliant and non-compliant items:
-                ppeCompliance: {
-                  "compliant": ["hard hats", "safety vests"],
-                  "nonCompliant": ["safety goggles"]
-                }
+              # OUTPUT QUALITY GUIDELINES
+              - Be concise but complete in all field entries
+              - Use proper construction terminology
+              - Format lists consistently
+              - Extract actionable information that would be useful for a construction team
+              - Ensure all lists are properly formatted as arrays of strings
+              - Make sure all fields appropriate to the report type are populated
               
               # RESPONSE FORMAT
               Return a JSON object with:
               - reportType: "SAFETY", "QUALITY", "EQUIPMENT", or "RFI"
               - title: Short descriptive title relevant to the report type
               - summary: Brief summary of key points (max 500 chars)
-              - actionItems: Array of action items that should be taken based on the report
-              - Plus the appropriate details object based on report type (safetyDetails, qualityDetails, equipmentDetails, or rfiDetails)`,
+              - actionItems: Array of clear, actionable tasks derived from the report
+              - Plus ONLY the appropriate details object based on report type (safetyDetails, qualityDetails, equipmentDetails, or rfiDetails)`,
           },
           { role: 'user', content: transcript },
         ],
@@ -159,6 +152,7 @@ export const chat = internalAction({
         throw new Error('Invalid JSON response from model');
       }
 
+      // Validate the response structure before saving
       const { 
         reportType = 'RFI', 
         title = 'Untitled Note', 
@@ -170,17 +164,20 @@ export const chat = internalAction({
         rfiDetails
       } = parsedResponse;
 
-      await ctx.runMutation(internal.together.saveSummary, {
+      // Ensure we have the correct details object based on report type
+      const validatedResponse = {
         id: args.id,
         reportType,
+        title,
         summary,
         actionItems,
-        title,
-        safetyDetails,
-        qualityDetails,
-        equipmentDetails,
-        rfiDetails
-      });
+        safetyDetails: reportType === 'SAFETY' ? ensureSafetyDetails(safetyDetails) : undefined,
+        qualityDetails: reportType === 'QUALITY' ? ensureQualityDetails(qualityDetails) : undefined,
+        equipmentDetails: reportType === 'EQUIPMENT' ? ensureEquipmentDetails(equipmentDetails) : undefined,
+        rfiDetails: reportType === 'RFI' ? ensureRfiDetails(rfiDetails) : undefined,
+      };
+
+      await ctx.runMutation(internal.together.saveSummary, validatedResponse);
     } catch (e) {
       console.error('Error extracting from voice message', e);
       await ctx.runMutation(internal.together.saveSummary, {
@@ -188,9 +185,61 @@ export const chat = internalAction({
         reportType: 'RFI',
         summary: 'Summary failed to generate',
         actionItems: [],
-        title: 'Title',
+        title: 'Processing Error',
       });
     }
+  },
+});
+
+// Helper functions to ensure proper structure for each report type
+function ensureSafetyDetails(details: any = {}) {
+  return {
+    incidents: Array.isArray(details?.incidents) ? details.incidents : [],
+    hazards: Array.isArray(details?.hazards) ? details.hazards : [],
+    ppeCompliance: details?.ppeCompliance || 'Not specified',
+  };
+}
+
+function ensureQualityDetails(details: any = {}) {
+  return {
+    controlPoints: Array.isArray(details?.controlPoints) ? details.controlPoints : [],
+    nonConformanceIssues: Array.isArray(details?.nonConformanceIssues) ? details.nonConformanceIssues : [],
+    correctiveActions: Array.isArray(details?.correctiveActions) ? details.correctiveActions : [],
+  };
+}
+
+function ensureEquipmentDetails(details: any = {}) {
+  return {
+    status: details?.status || 'Not specified',
+    operatingHours: details?.operatingHours || 'Not specified',
+    mechanicalIssues: Array.isArray(details?.mechanicalIssues) ? details.mechanicalIssues : [],
+  };
+}
+
+function ensureRfiDetails(details: any = {}) {
+  return {
+    questions: Array.isArray(details?.questions) ? details.questions : [],
+    clarifications: Array.isArray(details?.clarifications) ? details.clarifications : [],
+    documentReferences: Array.isArray(details?.documentReferences) ? details.documentReferences : [],
+  };
+}
+
+export const markProcessing = internalMutation({
+  args: {
+    id: v.id('notes'),
+  },
+  handler: async (ctx, args) => {
+    await ctx.db.patch(args.id, {
+      generatingTitle: true,
+      generatingActionItems: true,
+      reportType: undefined,
+      summary: undefined,
+      title: undefined,
+      safetyDetails: undefined,
+      qualityDetails: undefined,
+      equipmentDetails: undefined,
+      rfiDetails: undefined,
+    });
   },
 });
 
@@ -341,6 +390,18 @@ export const saveSummary = internalMutation({
       console.error(`Couldn't find note ${id}`);
       return;
     }
+    
+    // Delete any existing action items for this note before adding new ones
+    const existingActionItems = await ctx.db
+      .query("actionItems")
+      .withIndex("by_noteId", (q) => q.eq("noteId", id))
+      .collect();
+      
+    for (const item of existingActionItems) {
+      await ctx.db.delete(item._id);
+    }
+    
+    // Add new action items
     for (let actionItem of actionItems) {
       await ctx.db.insert('actionItems', {
         task: actionItem,
