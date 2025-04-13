@@ -25,6 +25,41 @@ const renderListItem = (item: any, idx: number) => {
 // Helper components for displaying report-specific details
 export const SafetyReport = ({ details }: { details: any }) => {
   if (!details) return null;
+  
+  // Helper to render PPE compliance, which could be string or object
+  const renderPPECompliance = () => {
+    if (!details.ppeCompliance) return null;
+    
+    if (typeof details.ppeCompliance === 'string') {
+      return <p>{details.ppeCompliance}</p>;
+    } else {
+      return (
+        <div>
+          {details.ppeCompliance.compliant && details.ppeCompliance.compliant.length > 0 && (
+            <div className="mb-2">
+              <h5 className="font-medium text-green-600">Compliant:</h5>
+              <ul className="ml-5 list-disc">
+                {details.ppeCompliance.compliant.map((item: string, idx: number) => (
+                  <li key={idx} className="text-green-600">{item}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+          {details.ppeCompliance.nonCompliant && details.ppeCompliance.nonCompliant.length > 0 && (
+            <div>
+              <h5 className="font-medium text-red-600">Non-Compliant:</h5>
+              <ul className="ml-5 list-disc">
+                {details.ppeCompliance.nonCompliant.map((item: string, idx: number) => (
+                  <li key={idx} className="text-red-600">{item}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      );
+    }
+  };
+  
   return (
     <div className="mt-4 border-t border-gray-200 pt-4">
       <h3 className="mb-2 text-lg font-semibold">Safety Details</h3>
@@ -47,7 +82,7 @@ export const SafetyReport = ({ details }: { details: any }) => {
       {details.ppeCompliance && (
         <div className="mb-3">
           <h4 className="font-medium">PPE Compliance:</h4>
-          <p>{details.ppeCompliance}</p>
+          {renderPPECompliance()}
         </div>
       )}
     </div>

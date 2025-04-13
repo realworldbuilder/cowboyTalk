@@ -102,6 +102,14 @@ export const chat = internalAction({
                 }
               ]
               
+              For PPE compliance in SAFETY reports, you can return either:
+              - A simple string: "All workers wearing required PPE" 
+              - OR an object with compliant and non-compliant items:
+                ppeCompliance: {
+                  "compliant": ["hard hats", "safety vests"],
+                  "nonCompliant": ["safety goggles"]
+                }
+              
               Return a JSON object with:
               - reportType: "SAFETY", "QUALITY", "EQUIPMENT", or "RFI"
               - title: Short descriptive title
@@ -200,7 +208,13 @@ export const saveSummary = internalMutation({
           })
         )
       )),
-      ppeCompliance: v.optional(v.string()),
+      ppeCompliance: v.optional(v.union(
+        v.string(),
+        v.object({
+          compliant: v.optional(v.array(v.string())),
+          nonCompliant: v.optional(v.array(v.string()))
+        })
+      )),
     })),
     qualityDetails: v.optional(v.object({
       controlPoints: v.optional(v.array(

@@ -30,7 +30,13 @@ export default defineSchema({
           })
         )
       )),
-      ppeCompliance: v.optional(v.string()),
+      ppeCompliance: v.optional(v.union(
+        v.string(),
+        v.object({
+          compliant: v.optional(v.array(v.string())),
+          nonCompliant: v.optional(v.array(v.string()))
+        })
+      )),
     })),
     qualityDetails: v.optional(v.object({
       controlPoints: v.optional(v.array(
