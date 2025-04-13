@@ -18,7 +18,7 @@ const Banner = () => {
           Note Taking
         </h1>
         <p className="mt-8 text-center text-xl font-light tracking-tight lg:text-3xl">
-          NotesGPT seamlessly converts your voice notes into{' '}
+          Cowboy Talk seamlessly converts your voice notes into{' '}
           <span className="font-bold">
             organized <br className="hidden lg:inline-block" />
             summaries
@@ -54,7 +54,7 @@ function BackgroundGradient() {
       style={{
         opacity: '0.4',
         background:
-          'radial-gradient(54.14% 54.14% at 50% 50%, #650293 0%, rgba(103, 2, 139, 0.02) 100%)',
+          'radial-gradient(54.14% 54.14% at 50% 50%, #B94700 0%, rgba(185, 71, 0, 0.02) 100%)',
         filter: 'blur(177px)',
       }}
     />
