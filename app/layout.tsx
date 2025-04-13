@@ -5,11 +5,11 @@ import Footer from '@/components/ui/Footer';
 import { Toaster } from 'react-hot-toast';
 import PlausibleProvider from 'next-plausible';
 
-let title = 'Cowboy Talk - Take notes with your voice';
-let description = 'Generate action items from your notes in seconds';
-let url = 'https://cowboy-talk.vercel.app';
-let ogimage = 'https://cowboy-talk.vercel.app/images/og-image.png';
-let sitename = 'cowboy-talk.vercel.app';
+let title = 'Cowboy Talk - Construction Voice Reporting';
+let description = 'Generate action items from your construction voice reports in seconds';
+let url = 'https://www.cowboytalk.app';
+let ogimage = 'https://www.cowboytalk.app/images/og-image.png';
+let sitename = 'cowboytalk.app';
 
 export const metadata: Metadata = {
   metadataBase: new URL(url),
