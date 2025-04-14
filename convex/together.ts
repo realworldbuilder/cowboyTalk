@@ -93,38 +93,69 @@ export const chat = internalAction({
               `You are an AI specialized in construction report analysis. Your task is to accurately classify and structure voice notes into one of five report categories, extracting appropriate data fields based on the report type.
 
               # CLASSIFICATION RULES
-              - Analyze the transcript carefully before making a classification
-              - Only classify if you have high confidence in the report type
-              - If the report contains mixed content, choose the most dominant type
-              - Default to GENERAL if the classification is unclear
+              - Analyze the transcript carefully and BE AGGRESSIVE in categorizing into specialized report types
+              - Prioritize classification into SAFETY, QUALITY, EQUIPMENT, or RFI whenever ANY specific indicators are present
+              - Be very STRICT about using the GENERAL category - it should ONLY be used when there are NO clear indicators of other types
+              - If the transcript contains MIXED content, choose based on the following priority: SAFETY > QUALITY > EQUIPMENT > RFI > GENERAL
               
-              # REPORT TYPES AND REQUIRED FIELDS
+              # REPORT TYPES AND KEY INDICATORS
               
-              ## 1. SAFETY REPORTS
+              ## 1. SAFETY REPORTS - Classify as SAFETY if ANY of these appear:
+              - Mentions of injuries, accidents, incidents, or near-misses
+              - References to hazards, risks, dangers, unsafe conditions
+              - Discussion of PPE (hardhats, vests, gloves, safety glasses, etc.)
+              - Words like "safety", "dangerous", "risk", "protect", "OSHA"
+              - Fall protection, confined spaces, trenching, scaffolding concerns
+              - Emergency procedures, evacuation, first aid
+              
               Required fields:
               - incidents: List all safety incidents mentioned (leave empty array if none mentioned)
               - hazards: List all safety hazards identified (leave empty array if none mentioned)
               - ppeCompliance: Document PPE compliance status as a detailed string
               
-              ## 2. QUALITY REPORTS
+              ## 2. QUALITY REPORTS - Classify as QUALITY if ANY of these appear:
+              - Inspection results, quality checks, or control points
+              - References to specifications, standards, or code compliance
+              - Discussion of workmanship, finish quality, tolerances
+              - Non-conformance issues, defects, deficiencies, rework needed
+              - Testing results, material quality, installation verification
+              - Words like "quality", "spec", "standard", "approve", "reject"
+              
               Required fields:
               - controlPoints: List specific quality control checkpoints mentioned
               - nonConformanceIssues: Document all quality problems or deficiencies
               - correctiveActions: List all recommended fixes or corrective measures
               
-              ## 3. EQUIPMENT REPORTS
+              ## 3. EQUIPMENT REPORTS - Classify as EQUIPMENT if ANY of these appear:
+              - Specific equipment mentioned by name or type
+              - Discussion of machinery status, operation, or performance
+              - Maintenance needs, service requirements, repairs
+              - Equipment breakdowns, malfunctions, or operational issues
+              - Hours of operation, fuel usage, servicing schedules
+              - Words like "equipment", "machine", "vehicle", "tool", "crane", "excavator"
+              
               Required fields:
               - status: Current operational state of equipment as a detailed string
               - operatingHours: Running time or usage metrics as a string
               - mechanicalIssues: List all equipment problems or maintenance needs
               
-              ## 4. RFI (REQUEST FOR INFORMATION) REPORTS
+              ## 4. RFI (REQUEST FOR INFORMATION) REPORTS - Classify as RFI if ANY of these appear:
+              - Direct questions requiring answers from designers or engineers
+              - Requests for clarification on plans, specs, or documents
+              - References to drawings, details, or specifications that need explanation
+              - Discussion of design conflicts, ambiguities, or missing information
+              - Words like "clarify", "question", "need information", "unclear", "confirm"
+              
               Required fields:
               - questions: List all explicit questions requiring answers
               - clarifications: List areas needing additional information
               - documentReferences: List references to plans, specs, or documents
               
-              ## 5. GENERAL CONSTRUCTION REPORTS
+              ## 5. GENERAL CONSTRUCTION REPORTS - ONLY classify as GENERAL when:
+              - The note contains no clear indicators of the specialized types above
+              - Content is purely about general progress, observations, or updates
+              - The transcript is too vague to confidently assign a specialized category
+              
               Required fields:
               - observations: List of general site observations or comments
               - progress: Overall project or task progress as a detailed string
@@ -150,7 +181,7 @@ export const chat = internalAction({
         ],
         model: 'mistralai/Mixtral-8x7B-Instruct-v0.1',
         max_tokens: 1000,
-        temperature: 0.6,
+        temperature: 0.3,
         response_format: { type: "json_object" }
       });
 
