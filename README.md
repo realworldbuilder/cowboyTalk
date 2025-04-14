@@ -1,10 +1,10 @@
-<a href="https://usenotesgpt.com/">
-  <img alt="NotesGPT – AI-powered voice note taking in seconds." src="/public/images/og-image.png">
-  <h1 align="center">notesGPT</h1>
+<a href="https://www.cowboytalk.app/">
+  <img alt="Cowboy Talk – Construction Voice Reporting System" src="/public/images/og-image.png">
+  <h1 align="center">Cowboy Talk</h1>
 </a>
 
 <p align="center">
-  Generate action items from your notes in seconds. Powered by Convex, Together.ai, and Whisper.
+  Construction Voice Reporting System. Generate categorized reports and action items from your voice notes in seconds. Powered by Convex, Together.ai, and Whisper.
 </p>
 
 <p align="center">
@@ -46,16 +46,13 @@ You can deploy this template by setting up the following services and adding the
 
 ## Future tasks:
 
-- [ ] Keep recording for future playback and display it on the page somewhere
-- [ ] Animate the purple microphone to be in sync with your voice
-- [ ] Store completed action items for the future instead of fully deleting them
-- [ ] Make text/images in the landing page smaller to account for multiple screen sizes.
-- [ ] Make the search experience a little smoother overall by searching automatically on entering text
-- [ ] Be able to have this as a PWA if there's an easy step to do that
-- [ ] Prompt engineer the summary a little more to be more useful than what's currently displaying
-- [ ] Add a Notion integration to be able to get the transcript + summary + action items on there
-- [ ] UI updates to make it look a little nicer based on Youssef's redesign
-- [ ] Be able to edit action items after the fact and set a due date for them
-- [ ] Account for layout shift on the dashboard page when refreshing – show a loading state on content?
-- [ ] Make action items animate out + make checkbox rounded + add a little check icon on hover
-- [ ] Migrate to incredibly fast whisper
+- [ ] Add more detailed reporting categorization (Safety, Quality, Equipment, RFI)
+- [ ] Add ability to share reports with team members
+- [ ] Integrate with construction management software
+- [ ] Add photo attachments to voice reports
+- [ ] Add location tagging for job site context
+- [ ] Implement report templates for common scenarios
+- [ ] Enable offline recording with syncing when back online
+- [ ] Add role-based permissions for different team members
+- [ ] Integrate with scheduling systems
+- [ ] Add report analytics and insights dashboard
