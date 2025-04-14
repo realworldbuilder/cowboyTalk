@@ -264,157 +264,181 @@ export default function RecordingDesktop({
 
   return (
     <div className="hidden md:block">
-      <div className="max-width mt-5 flex items-center justify-between">
-        <div />
-        <div className="text-center">
+      <div className="mx-auto max-w-6xl px-6 pt-8">
+        {/* Header Section */}
+        <header className="mb-6 flex items-center justify-between">
+          <Link 
+            href="/dashboard" 
+            className="flex items-center gap-2 text-sm font-medium text-muted transition-colors hover:text-primary"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M19 12H5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M12 19L5 12L12 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+            <span>Back to Dashboard</span>
+          </Link>
+          <div className="text-sm text-muted">
+            {formatTimestamp(Number(_creationTime))}
+          </div>
+        </header>
+
+        {/* Title Section */}
+        <div className="mb-8 text-center">
+          <div className="mb-2 flex items-center justify-center">
+            {reportType && !generatingTitle && (
+              <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
+                {reportType} REPORT
+              </span>
+            )}
+          </div>
           <h1
-            className={`leading text-center text-xl font-medium leading-[114.3%] tracking-[-0.75px] text-dark md:text-[35px] lg:text-[43px] ${
+            className={`text-2xl font-medium leading-tight text-dark md:text-3xl ${
               generatingTitle && 'animate-pulse'
             }`}
           >
             {generatingTitle ? 'Generating Title...' : title ?? 'Untitled Note'}
           </h1>
-          {reportType && !generatingTitle && (
-            <div className="mt-2 flex justify-center">
-              <span className="rounded-full bg-dark px-3 py-1 text-sm text-light">
-                {reportType} REPORT
-              </span>
-            </div>
-          )}
         </div>
-        <div className="flex items-center justify-center">
-          <p className="text-lg opacity-80">
-            {formatTimestamp(Number(_creationTime))}
-          </p>
-        </div>
-      </div>
-      <div className="mt-[18px] grid h-fit w-full grid-cols-2 px-[30px] py-[19px] lg:px-[45px]">
-        <div className="flex w-full items-center justify-center gap-[50px] border-r  lg:gap-[70px]">
-          <div className="flex items-center gap-4">
-            <button
-              className={`text-xl leading-[114.3%] tracking-[-0.6px] text-dark lg:text-2xl ${
-                originalIsOpen ? 'opacity-100' : 'opacity-40'
-              } transition-all duration-300`}
-            >
-              Transcript
-            </button>
-            <div
-              onClick={() => setOriginalIsOpen(!originalIsOpen)}
-              className="flex h-[20px] w-[36px] cursor-pointer items-center rounded-full bg-dark px-[1px]"
-            >
-              <div
-                className={`h-[18px] w-4 rounded-[50%] bg-light ${
-                  originalIsOpen ? 'translate-x-0' : 'translate-x-[18px]'
-                } transition-all duration-300`}
-              />
-            </div>
-            <button
-              className={`text-xl leading-[114.3%] tracking-[-0.6px] text-dark lg:text-2xl ${
-                !originalIsOpen ? 'opacity-100' : 'opacity-40'
-              } transition-all duration-300`}
-            >
-              Summary
-            </button>
-          </div>
-        </div>
-        <div className="text-center">
-          <h1 className="text-xl leading-[114.3%] tracking-[-0.75px] text-dark lg:text-2xl xl:text-[30px]">
-            Action Items
-          </h1>
-        </div>
-      </div>
-      <div className="grid h-full w-full grid-cols-2 px-[30px] lg:px-[45px]">
-        <div className="relative min-h-[70vh] w-full border-r px-5 py-3 text-justify text-xl font-[300] leading-[114.3%] tracking-[-0.6px] lg:text-2xl">
-          {transcription ? (
-            <div className="">
-              {originalIsOpen ? transcription : (
-                <>
-                  <div>{summary}</div>
-                  <ReportDetails />
-                </>
-              )}
-            </div>
-          ) : (
-            // Loading state for transcript
-            <ul className="animate-pulse space-y-3">
-              <li className="h-6 w-full rounded-full bg-gray-200 dark:bg-gray-700"></li>
-              <li className="h-6 w-full rounded-full bg-gray-200 dark:bg-gray-700"></li>
-              <li className="h-6 w-full rounded-full bg-gray-200 dark:bg-gray-700"></li>
-              <li className="h-6 w-full rounded-full bg-gray-200 dark:bg-gray-700"></li>
-              <li className="h-6 w-full rounded-full bg-gray-200 dark:bg-gray-700"></li>
-            </ul>
-          )}
-        </div>
-        <div className="relative mx-auto mt-[27px] w-full max-w-[900px] px-5 md:mt-[45px]">
-          {note?.generatingActionItems
-            ? [0, 1, 3].map((item: any, idx: number) => (
-                <div
-                  className="animate-pulse border-[#00000033] py-1 md:border-t-[1px] md:py-2"
-                  key={idx}
+
+        {/* Content Section */}
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+          {/* Left Column: Transcript/Summary */}
+          <div className="lg:col-span-2">
+            <div className="mb-4 flex items-center justify-between border-b border-gray-200 pb-2">
+              <div className="flex items-center gap-4">
+                <button
+                  onClick={() => setOriginalIsOpen(true)}
+                  className={`text-sm font-medium ${
+                    originalIsOpen ? 'text-primary' : 'text-muted hover:text-dark'
+                  } transition-colors`}
                 >
-                  <div className="mt-2 h-6 rounded-full bg-gray-200 dark:bg-gray-700"></div>
-                </div>
-              ))
-            : actionItems?.map((item: any, idx: number) => (
-                <div
-                  className="border-[#00000033] py-1 md:border-t-[1px] md:py-2"
-                  key={idx}
+                  Transcript
+                </button>
+                <button
+                  onClick={() => setOriginalIsOpen(false)}
+                  className={`text-sm font-medium ${
+                    !originalIsOpen ? 'text-primary' : 'text-muted hover:text-dark'
+                  } transition-colors`}
                 >
-                  <div className="flex items-center justify-between" key={idx}>
-                    <p className=" text-[16px] font-[300] leading-[114.3%] tracking-[-0.4px] text-dark md:text-xl lg:text-2xl">
-                      {item.task}
-                    </p>
-                    <button
-                      onClick={() => {
-                        removeActionItem(item._id);
-                      }}
-                      className="rounded-[4px] bg-dark px-4 py-[6px] text-sm text-light"
-                    >
-                      Delete
-                    </button>
-                  </div>
+                  Summary
+                </button>
+              </div>
+            </div>
+            <div className="rounded-lg bg-white p-5 shadow-minimal">
+              {transcription ? (
+                <div className="text-base leading-relaxed text-dark/80">
+                  {originalIsOpen ? (
+                    transcription
+                  ) : (
+                    <>
+                      <div className="mb-6">{summary}</div>
+                      <ReportDetails />
+                    </>
+                  )}
                 </div>
-              ))}
-          <div className="absolute bottom-5 left-1/2 flex -translate-x-1/2 flex-col items-center justify-center space-y-3 md:flex-row md:space-x-4 md:space-y-0">
-            <Link
-              href="/dashboard/action-items"
-              className="flex items-center justify-center gap-2 rounded-md bg-white px-4 py-3 text-base font-medium text-dark shadow-sm transition-all hover:bg-gray-50 md:px-5"
-            >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M9 11L12 14L22 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="M21 12V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-              <span>All Action Items</span>
-            </Link>
-            <button
-              onClick={handleEmailGeneration}
-              disabled={isGeneratingEmail}
-              className="flex items-center justify-center gap-2 rounded-md bg-primary px-4 py-3 text-base font-medium text-white shadow-sm transition-all hover:bg-primary/90 md:px-5"
-            >
-              {isGeneratingEmail ? (
-                <span className="flex items-center gap-2">
-                  <svg className="animate-spin" width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M12 2V6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M12 18V22" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M4.93 4.93L7.76 7.76" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M16.24 16.24L19.07 19.07" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M2 12H6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M18 12H22" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M4.93 19.07L7.76 16.24" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M16.24 7.76L19.07 4.93" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                  <span>Generating...</span>
-                </span>
               ) : (
-                <>
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M4 4H20C21.1 4 22 4.9 22 6V18C22 19.1 21.1 20 20 20H4C2.9 20 2 19.1 2 18V6C2 4.9 2.9 4 4 4Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M22 6L12 13L2 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                  <span>Email Report</span>
-                </>
+                // Loading state for transcript
+                <ul className="animate-pulse space-y-3">
+                  <li className="h-4 w-full rounded-full bg-gray-200"></li>
+                  <li className="h-4 w-full rounded-full bg-gray-200"></li>
+                  <li className="h-4 w-11/12 rounded-full bg-gray-200"></li>
+                  <li className="h-4 w-full rounded-full bg-gray-200"></li>
+                  <li className="h-4 w-4/5 rounded-full bg-gray-200"></li>
+                </ul>
               )}
-            </button>
+            </div>
+          </div>
+
+          {/* Right Column: Action Items */}
+          <div>
+            <div className="mb-4 border-b border-gray-200 pb-2">
+              <h2 className="text-lg font-medium text-dark">Action Items</h2>
+            </div>
+            <div className="rounded-lg bg-white p-4 shadow-minimal">
+              {note?.generatingActionItems ? (
+                <div className="space-y-3">
+                  {[0, 1, 2].map((idx) => (
+                    <div key={idx} className="animate-pulse rounded-md bg-gray-100 p-3">
+                      <div className="h-4 w-11/12 rounded-full bg-gray-200"></div>
+                    </div>
+                  ))}
+                </div>
+              ) : actionItems && actionItems.length > 0 ? (
+                <div className="space-y-3">
+                  {actionItems.map((item: any, idx: number) => (
+                    <div
+                      key={idx}
+                      className="flex items-center justify-between rounded-md border border-gray-100 bg-gray-50 p-3"
+                    >
+                      <p className="flex-1 text-sm text-dark">
+                        {item.task}
+                      </p>
+                      <button
+                        onClick={() => removeActionItem(item._id)}
+                        className="ml-3 flex h-6 w-6 items-center justify-center rounded-full text-muted transition-colors hover:bg-primary/10 hover:text-primary"
+                      >
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M18 6L6 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                          <path d="M6 6L18 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center py-8">
+                  <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-accent/20 text-primary">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M12 8V12M12 16H12.01M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </div>
+                  <p className="text-center text-sm text-muted">No action items found</p>
+                </div>
+              )}
+              
+              {/* Actions */}
+              <div className="mt-6 flex flex-col gap-3">
+                <Link
+                  href="/dashboard/action-items"
+                  className="flex items-center justify-center gap-2 rounded-md border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-dark shadow-sm transition-all hover:bg-gray-50"
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M9 11L12 14L22 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M21 12V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                  <span>All Action Items</span>
+                </Link>
+                <button
+                  onClick={handleEmailGeneration}
+                  disabled={isGeneratingEmail}
+                  className="flex items-center justify-center gap-2 rounded-md bg-primary px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-all hover:bg-primary/90"
+                >
+                  {isGeneratingEmail ? (
+                    <span className="flex items-center gap-2">
+                      <svg className="animate-spin" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2V6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        <path d="M12 18V22" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        <path d="M4.93 4.93L7.76 7.76" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        <path d="M16.24 16.24L19.07 19.07" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        <path d="M2 12H6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        <path d="M18 12H22" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        <path d="M4.93 19.07L7.76 16.24" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        <path d="M16.24 7.76L19.07 4.93" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                      <span>Generating...</span>
+                    </span>
+                  ) : (
+                    <>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M4 4H20C21.1 4 22 4.9 22 6V18C22 19.1 21.1 20 20 20H4C2.9 20 2 19.1 2 18V6C2 4.9 2.9 4 4 4Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        <path d="M22 6L12 13L2 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                      <span>Email Report</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
