@@ -13,8 +13,7 @@ const Banner = () => {
           <span className="font-medium text-primary">Invite only</span> for now. Sorry, partner.
         </a>
         <h1 className="text-center text-4xl font-medium tracking-tight text-dark md:text-5xl lg:text-6xl">
-          AI-Power for Construction<br className="hidden md:inline-block" />
-          Superintendents
+          AI-Power for Construction Superintendents
         </h1>
         <p className="mt-6 max-w-2xl text-center text-lg font-light tracking-tight text-dark/80 md:mt-8 md:text-xl">
           Cowboy Talk seamlessly converts your voice notes into{' '}
