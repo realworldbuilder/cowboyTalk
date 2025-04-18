@@ -93,12 +93,15 @@ const RecordVoicePage = () => {
   };
 
   return (
-    <div className=" flex flex-col items-center justify-between">
-      <h1 className="pt-[25px] text-center text-xl font-medium text-dark md:pt-[47px] md:text-4xl">
-        {title}
-      </h1>
-      <p className="mb-20 mt-4 text-gray-400">{formattedDate}</p>
-      <div className="relative mx-auto flex h-[316px] w-[316px] items-center justify-center">
+    <div className="flex min-h-[90vh] flex-col items-center justify-between py-4">
+      <div>
+        <h1 className="pt-2 text-center text-xl font-medium text-dark md:pt-4 md:text-3xl">
+          {title}
+        </h1>
+        <p className="mt-2 text-center text-sm text-gray-400">{formattedDate}</p>
+      </div>
+      
+      <div className="relative mx-auto flex h-[260px] w-[260px] items-center justify-center md:h-[300px] md:w-[300px]">
         <div
           className={`recording-box absolute h-full w-full rounded-[50%] p-[12%] pt-[17%] ${
             title !== 'Record your voice note' && title !== 'Processing...'
@@ -112,18 +115,19 @@ const RecordVoicePage = () => {
           />
         </div>
         <div className="z-50 flex h-fit w-fit flex-col items-center justify-center">
-          <h1 className="text-[60px] leading-[114.3%] tracking-[-1.5px] text-light">
+          <h1 className="text-[50px] leading-[114.3%] tracking-[-1.5px] text-light md:text-[60px]">
               {formatTime(Math.floor(totalSeconds / 60))}:{formatTime(totalSeconds % 60)}
           </h1>
         </div>
       </div>
-      <div className="mt-10 flex w-fit items-center justify-center gap-[33px] pb-7 md:gap-[77px] ">
+      
+      <div className="flex w-fit items-center justify-center gap-[33px] md:gap-[77px]">
         {envVarsUrl ? (
           <MissingEnvVars url={envVarsUrl} />
         ) : (
           <button
             onClick={handleRecordClick}
-            className="mt-10 h-fit w-fit rounded-[50%] border-[2px]"
+            className="h-fit w-fit rounded-[50%] border-[2px]"
             style={{ boxShadow: '0px 0px 8px 5px rgba(0,0,0,0.3)' }}
           >
             {!isRunning ? (
@@ -132,7 +136,7 @@ const RecordVoicePage = () => {
                 alt="recording mic"
                 width={148}
                 height={148}
-                className="h-[70px] w-[70px] md:h-[100px] md:w-[100px]"
+                className="h-[60px] w-[60px] md:h-[90px] md:w-[90px]"
               />
             ) : (
               <Image
@@ -140,7 +144,7 @@ const RecordVoicePage = () => {
                 alt="recording mic"
                 width={148}
                 height={148}
-                className="h-[70px] w-[70px] animate-pulse transition md:h-[100px] md:w-[100px]"
+                className="h-[60px] w-[60px] animate-pulse transition md:h-[90px] md:w-[90px]"
               />
             )}
           </button>
