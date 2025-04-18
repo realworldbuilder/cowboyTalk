@@ -200,3 +200,48 @@ export const deleteOldFiles = internalMutation({
     }
   },
 });
+
+export const generateImageUploadUrl = mutationWithUser({
+  args: {},
+  handler: async (ctx) => {
+    return await ctx.storage.generateUploadUrl();
+  },
+});
+
+export const attachImageToNote = mutationWithUser({
+  args: {
+    noteId: v.id('notes'),
+    storageId: v.id('_storage'),
+  },
+  handler: async (ctx, { noteId, storageId }) => {
+    const userId = ctx.userId;
+    
+    // Verify the note exists and belongs to this user
+    const note = await ctx.db.get(noteId);
+    if (!note || note.userId !== userId) {
+      throw new ConvexError("Note not found or you don't have permission to modify it");
+    }
+    
+    const imageUrl = await ctx.storage.getUrl(storageId);
+    if (!imageUrl) {
+      throw new ConvexError("Failed to get image URL");
+    }
+    
+    // Update the note with the new image URL
+    const existingUrls = note.imageUrls || [];
+    await ctx.db.patch(noteId, {
+      imageUrls: [...existingUrls, imageUrl]
+    });
+    
+    // If the transcript is already complete, update the AI analysis to include the image
+    if (!note.generatingTranscript && note.transcription) {
+      await ctx.scheduler.runAfter(0, internal.together.chat, {
+        id: noteId,
+        transcript: note.transcription,
+        imageUrls: [...existingUrls, imageUrl]
+      });
+    }
+    
+    return imageUrl;
+  },
+});

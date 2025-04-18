@@ -43,6 +43,10 @@ const NoteSchema = z.object({
     .describe(
       'A list of action items from the voice note, short and to the point. Make sure all action item lists are fully resolved if they are nested',
     ),
+  imageUrls: z
+    .array(z.string())
+    .describe('URLs of images associated with this note')
+    .optional(),
   // Fields specific to each report type
   safetyDetails: z.object({
     incidents: z.array(z.string()).optional(),
@@ -75,9 +79,10 @@ export const chat = internalAction({
   args: {
     id: v.id('notes'),
     transcript: v.string(),
+    imageUrls: v.optional(v.array(v.string())),
   },
   handler: async (ctx, args) => {
-    const { transcript } = args;
+    const { transcript, imageUrls = [] } = args;
 
     // Mark note as processing to prevent premature display
     await ctx.runMutation(internal.together.markProcessing, {
@@ -85,14 +90,21 @@ export const chat = internalAction({
     });
 
     try {
-      const response = await togetherai.chat.completions.create({
-        messages: [
-          {
-            role: 'system',
-            content:
-              `You are an AI specialized in construction report analysis. Your task is to accurately classify and structure voice notes into one of five report categories, extracting appropriate data fields based on the report type.
-
-              # CLASSIFICATION RULES
+      // Build system prompt with image handling instructions if images are present
+      let systemPrompt = `You are an AI specialized in construction report analysis. Your task is to accurately classify and structure voice notes into one of five report categories, extracting appropriate data fields based on the report type.`;
+      
+      if (imageUrls.length > 0) {
+        systemPrompt += `\n\n# IMAGE ANALYSIS
+        - The report includes ${imageUrls.length} image(s) related to the construction site or issue
+        - Consider these images as visual evidence supporting the voice transcript
+        - Reference relevant visual details in your summary and observations
+        - For safety reports, note visible hazards or PPE compliance shown in images
+        - For quality reports, reference visual evidence of workmanship or defects
+        - For equipment reports, note the visual condition of equipment shown
+        - Incorporate relevant image details throughout your analysis`;
+      }
+      
+      systemPrompt += `\n\n# CLASSIFICATION RULES
               - Analyze the transcript carefully and BE AGGRESSIVE in categorizing into specialized report types
               - Prioritize classification into SAFETY, QUALITY, EQUIPMENT, or RFI whenever ANY specific indicators are present
               - Be very STRICT about using the GENERAL category - it should ONLY be used when there are NO clear indicators of other types
@@ -175,7 +187,13 @@ export const chat = internalAction({
               - title: Short descriptive title relevant to the report type
               - summary: Brief summary of key points (max 500 chars)
               - actionItems: Array of clear, actionable tasks derived from the report
-              - Plus ONLY the appropriate details object based on report type (safetyDetails, qualityDetails, equipmentDetails, rfiDetails, or generalDetails)`,
+              - Plus ONLY the appropriate details object based on report type (safetyDetails, qualityDetails, equipmentDetails, rfiDetails, or generalDetails)`;
+
+      const response = await togetherai.chat.completions.create({
+        messages: [
+          {
+            role: 'system',
+            content: systemPrompt,
           },
           { role: 'user', content: transcript },
         ],
@@ -216,6 +234,7 @@ export const chat = internalAction({
         title,
         summary,
         actionItems,
+        imageUrls,
         safetyDetails: reportType === 'SAFETY' ? ensureSafetyDetails(safetyDetails) : undefined,
         qualityDetails: reportType === 'QUALITY' ? ensureQualityDetails(qualityDetails) : undefined,
         equipmentDetails: reportType === 'EQUIPMENT' ? ensureEquipmentDetails(equipmentDetails) : undefined,
@@ -232,6 +251,7 @@ export const chat = internalAction({
         summary: 'Summary failed to generate',
         actionItems: [],
         title: 'Processing Error',
+        imageUrls: imageUrls,
       });
     }
   },
@@ -289,6 +309,7 @@ export const markProcessing = internalMutation({
       reportType: undefined,
       summary: undefined,
       title: undefined,
+      imageUrls: undefined,
       safetyDetails: undefined,
       qualityDetails: undefined,
       equipmentDetails: undefined,
@@ -316,6 +337,7 @@ export const saveSummary = internalMutation({
     summary: v.string(),
     title: v.string(),
     actionItems: v.array(v.string()),
+    imageUrls: v.optional(v.array(v.string())),
     safetyDetails: v.optional(v.object({
       incidents: v.optional(v.array(
         v.union(
@@ -427,6 +449,7 @@ export const saveSummary = internalMutation({
       summary, 
       actionItems, 
       title,
+      imageUrls,
       safetyDetails,
       qualityDetails,
       equipmentDetails,
@@ -439,6 +462,7 @@ export const saveSummary = internalMutation({
       summary,
       title,
       generatingTitle: false,
+      imageUrls: imageUrls,
       safetyDetails,
       qualityDetails,
       equipmentDetails,
@@ -500,6 +524,7 @@ export const generateEmail = actionWithUser({
     // We already checked authorization in getNote query
     const noteData = note.note;
     const actionItems = note.actionItems || [];
+    const hasImages = noteData.imageUrls && noteData.imageUrls.length > 0;
     
     // Prepare the context data - use default values if not provided
     const emailContext = {
@@ -512,7 +537,9 @@ export const generateEmail = actionWithUser({
       sender: {
         name: senderName || "Site Manager",
       },
-      includeAttachments
+      includeAttachments,
+      hasImages,
+      imageCount: noteData.imageUrls?.length || 0
     };
     
     // Generate email content
@@ -554,6 +581,12 @@ export const generateEmail = actionWithUser({
           - Format the email for clarity with appropriate spacing
           - Action items should be listed as bullet points with clear deadlines when possible
           - Keep paragraphs short and scannable
+          
+          # IMAGE HANDLING
+          - If the report includes images, mention this fact in the email
+          - Refer to images as "attached photos" if includeAttachments is true
+          - Indicate the number of images if there are multiple
+          - Briefly reference what the images show if relevant to the report type
           
           # RESPONSE FORMAT
           Provide the complete email as plain text with:

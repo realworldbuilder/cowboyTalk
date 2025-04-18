@@ -69,6 +69,7 @@ export const saveTranscript = internalMutation({
     await ctx.scheduler.runAfter(0, internal.together.chat, {
       id: args.id,
       transcript,
+      imageUrls: note.imageUrls || [],
     });
 
     await ctx.scheduler.runAfter(0, internal.together.embed, {

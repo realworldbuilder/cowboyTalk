@@ -11,6 +11,7 @@ export default defineSchema({
     summary: v.optional(v.string()),
     embedding: v.optional(v.array(v.float64())),
     reportType: v.optional(v.string()),
+    imageUrls: v.optional(v.array(v.string())),
     safetyDetails: v.optional(v.object({
       incidents: v.optional(v.array(
         v.union(

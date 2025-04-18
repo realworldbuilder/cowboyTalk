@@ -6,6 +6,8 @@ import Link from 'next/link';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { Id } from '@/convex/_generated/dataModel';
+import ImageUploader from '@/app/components/ImageUploader';
+import ImageViewer from '@/app/components/ImageViewer';
 
 // Helper function to render list items that can be strings or objects with description/type
 const renderListItem = (item: any, idx: number) => {
@@ -201,7 +203,8 @@ export default function RecordingDesktop({
     safetyDetails,
     qualityDetails,
     equipmentDetails,
-    rfiDetails
+    rfiDetails,
+    imageUrls
   } = note;
   const [originalIsOpen, setOriginalIsOpen] = useState(true);
   const [isGeneratingEmail, setIsGeneratingEmail] = useState(false);
@@ -332,6 +335,9 @@ export default function RecordingDesktop({
                   ) : (
                     <>
                       <div className="mb-6">{summary}</div>
+                      {imageUrls && imageUrls.length > 0 && (
+                        <ImageViewer imageUrls={imageUrls} />
+                      )}
                       <ReportDetails />
                     </>
                   )}
@@ -398,6 +404,10 @@ export default function RecordingDesktop({
               
               {/* Actions */}
               <div className="mt-6 flex flex-col gap-3">
+                <ImageUploader 
+                  noteId={_id}
+                  existingImages={imageUrls || []}
+                />
                 <Link
                   href="/dashboard/action-items"
                   className="flex items-center justify-center gap-2 rounded-md border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-dark shadow-sm transition-all hover:bg-gray-50"
