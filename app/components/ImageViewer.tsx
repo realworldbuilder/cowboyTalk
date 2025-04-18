@@ -48,6 +48,7 @@ export default function ImageViewer({ imageUrls }: ImageViewerProps) {
               alt={`Image ${index + 1}`} 
               fill 
               className="object-cover hover:opacity-90 transition-opacity"
+              unoptimized
             />
           </div>
         ))}
@@ -76,6 +77,7 @@ export default function ImageViewer({ imageUrls }: ImageViewerProps) {
               alt={`Fullscreen image ${fullscreenIndex + 1}`} 
               fill
               className="object-contain" 
+              unoptimized
             />
           </div>
           

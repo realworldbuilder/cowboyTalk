@@ -73,6 +73,7 @@ export default function ImageUploader({ noteId, existingImages = [], setImages }
               alt={`Uploaded image ${index + 1}`} 
               fill 
               className="object-cover"
+              unoptimized
             />
           </div>
         ))}
