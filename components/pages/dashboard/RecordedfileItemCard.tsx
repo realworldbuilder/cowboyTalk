@@ -1,5 +1,6 @@
 import { api } from '@/convex/_generated/api';
-import { useMutation, useAction } from 'convex/react';
+import { Id } from '@/convex/_generated/dataModel';
+import { useMutation, useAction, useQuery } from 'convex/react';
 import Link from 'next/link';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
@@ -17,6 +18,7 @@ const RecordedfileItemCard = ({
 }) => {
   const deleteNote = useMutation(api.notes.removeNote);
   const generateEmail = useAction(api.together.generateEmail);
+  const noteDetails = useQuery(api.notes.getNote, { id: _id });
   const [isGeneratingEmail, setIsGeneratingEmail] = useState(false);
   
   async function handleEmailGeneration(e: React.MouseEvent) {
@@ -31,8 +33,11 @@ const RecordedfileItemCard = ({
         recipientName: "",
         recipientEmail: "",
         senderName: "",
-        includeAttachments: false
+        includeAttachments: true // Set to true to mention images
       });
+      
+      // Get the image URLs from the note details
+      const imageUrls = noteDetails?.note?.imageUrls || [];
       
       // Extract subject line (first line)
       const lines = emailContent.split('\n');
@@ -43,6 +48,15 @@ const RecordedfileItemCard = ({
       if (lines.length > 1 && lines[0].toLowerCase().startsWith('subject:')) {
         subject = lines[0].substring(8).trim();
         body = lines.slice(1).join('\n').trim();
+      }
+      
+      // Add image URLs to email if images exist
+      if (imageUrls.length > 0) {
+        body += "\n\n--------------------\nIMAGE LINKS:\n";
+        imageUrls.forEach((url: string, index: number) => {
+          body += `\nImage ${index + 1}: ${url}`;
+        });
+        body += "\n\nNote: You can copy and paste these links into your browser to view the images.";
       }
       
       // Create mailto link
