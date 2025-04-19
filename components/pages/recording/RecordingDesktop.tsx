@@ -224,7 +224,7 @@ export default function RecordingDesktop({
         recipientName: "",
         recipientEmail: "",
         senderName: "",
-        includeAttachments: false
+        includeAttachments: true
       });
       
       // Extract subject line (first line)
@@ -236,6 +236,15 @@ export default function RecordingDesktop({
       if (lines.length > 1 && lines[0].toLowerCase().startsWith('subject:')) {
         subject = lines[0].substring(8).trim();
         body = lines.slice(1).join('\n').trim();
+      }
+      
+      // Add image URLs to email if images exist
+      if (imageUrls && imageUrls.length > 0) {
+        body += "\n\n--------------------\nIMAGE LINKS:\n";
+        imageUrls.forEach((url: string, index: number) => {
+          body += `\nImage ${index + 1}: ${url}`;
+        });
+        body += "\n\nNote: You can copy and paste these links into your browser to view the images.";
       }
       
       // Create mailto link
