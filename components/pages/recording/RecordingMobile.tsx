@@ -35,7 +35,7 @@ export default function RecordingMobile({
     _id
   } = note;
   
-  const [activeTab, setActiveTab] = useState<'transcript' | 'summary' | 'actions'>('transcript');
+  const [activeTab, setActiveTab] = useState<'transcript' | 'summary' | 'actions' | 'photos'>('transcript');
   const [isGeneratingEmail, setIsGeneratingEmail] = useState(false);
 
   const mutateActionItems = useMutation(api.notes.removeActionItem);
@@ -159,6 +159,16 @@ export default function RecordingMobile({
             Summary
           </button>
           <button
+            onClick={() => setActiveTab('photos')}
+            className={`flex-1 rounded-md py-2 text-xs transition-colors ${
+              activeTab === 'photos' 
+                ? 'bg-white text-primary shadow-button' 
+                : 'text-dark/60 hover:text-primary'
+            }`}
+          >
+            Photos
+          </button>
+          <button
             onClick={() => setActiveTab('actions')}
             className={`flex-1 rounded-md py-2 text-xs transition-colors ${
               activeTab === 'actions' 
@@ -181,10 +191,38 @@ export default function RecordingMobile({
           {activeTab === 'summary' && (
             <div className="text-sm leading-relaxed text-dark/80">
               <p className="mb-4">{summary}</p>
-              {imageUrls && imageUrls.length > 0 && (
-                <ImageViewer imageUrls={imageUrls} />
-              )}
               <ReportDetails />
+            </div>
+          )}
+          
+          {activeTab === 'photos' && (
+            <div>
+              {imageUrls && imageUrls.length > 0 ? (
+                <div>
+                  <ImageViewer imageUrls={imageUrls} />
+                </div>
+              ) : (
+                <div className="flex min-h-[30vh] flex-col items-center justify-center">
+                  <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-accent/20 text-primary">
+                    <svg 
+                      width="20" 
+                      height="20" 
+                      viewBox="0 0 24 24" 
+                      fill="none" 
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path 
+                        d="M12 8V12M12 16H12.01M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" 
+                        stroke="currentColor" 
+                        strokeWidth="2" 
+                        strokeLinecap="round" 
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </div>
+                  <p className="text-center text-sm text-muted">No photos available</p>
+                </div>
+              )}
             </div>
           )}
           

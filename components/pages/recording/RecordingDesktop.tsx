@@ -346,9 +346,6 @@ export default function RecordingDesktop({
                   ) : (
                     <>
                       <div className="mb-6">{summary}</div>
-                      {imageUrls && imageUrls.length > 0 && (
-                        <ImageViewer imageUrls={imageUrls} />
-                      )}
                       <ReportDetails />
                     </>
                   )}
@@ -364,6 +361,18 @@ export default function RecordingDesktop({
                 </ul>
               )}
             </div>
+            
+            {/* Photos Section - New component */}
+            {imageUrls && imageUrls.length > 0 && (
+              <div className="mt-6">
+                <div className="mb-4 border-b border-gray-200 pb-2">
+                  <h2 className="text-lg font-medium text-dark">Photos</h2>
+                </div>
+                <div className="rounded-lg bg-white p-5 shadow-minimal">
+                  <ImageViewer imageUrls={imageUrls} />
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Right Column: Action Items */}
