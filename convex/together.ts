@@ -586,7 +586,14 @@ export const generateEmail = actionWithUser({
           - If the report includes images, mention this fact in the email
           - Refer to images as "attached photos" if includeAttachments is true
           - Indicate the number of images if there are multiple
-          - Briefly reference what the images show if relevant to the report type
+          - Use wording like "As shown in the site photos," or "The images document the following issues:"
+          - Make intelligent assumptions about what the images likely show based on the report type and content:
+            * For SAFETY reports: Assume images show safety hazards, PPE compliance issues, or incident areas
+            * For QUALITY reports: Assume images show non-conformance issues, quality control points, or work requiring correction
+            * For EQUIPMENT reports: Assume images show equipment conditions, mechanical issues, or operational states
+            * For RFI reports: Assume images show areas requiring clarification or design interpretation
+            * For GENERAL reports: Assume images show general site conditions or work progress
+          - Write as if the images provide clear visual evidence supporting the points in your email
           
           # RESPONSE FORMAT
           Provide the complete email as plain text with:
