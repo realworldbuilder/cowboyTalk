@@ -52,11 +52,13 @@ const RecordedfileItemCard = ({
       
       // Add image URLs to email if images exist
       if (imageUrls.length > 0) {
-        body += "\n\n--------------------\nIMAGE LINKS:\n";
+        body += "\n\n--------------------\nATTACHMENT REFERENCES:\n";
+        body += `\nThe following ${imageUrls.length} image${imageUrls.length > 1 ? 's are' : ' is'} referenced in this report:\n`;
         imageUrls.forEach((url: string, index: number) => {
-          body += `\nImage ${index + 1}: ${url}`;
+          const imageNumber = index + 1;
+          body += `\n• [SITE PHOTO ${imageNumber}] - View image: ${url}`;
         });
-        body += "\n\nNote: You can copy and paste these links into your browser to view the images.";
+        body += "\n\nNote: Click on the links above to view the referenced site photos.";
       }
       
       // Create mailto link
