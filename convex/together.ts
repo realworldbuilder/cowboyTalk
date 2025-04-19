@@ -526,6 +526,12 @@ export const generateEmail = actionWithUser({
     const actionItems = note.actionItems || [];
     const hasImages = noteData.imageUrls && noteData.imageUrls.length > 0;
     
+    // Check if there are urgent/high-priority items that should be highlighted
+    const hasUrgentItems = determineUrgency(noteData, actionItems);
+    
+    // Get project information and context for smarter emails
+    const projectContext = generateProjectContext(noteData);
+    
     // Prepare the context data - use default values if not provided
     const emailContext = {
       note: noteData,
@@ -539,7 +545,9 @@ export const generateEmail = actionWithUser({
       },
       includeAttachments,
       hasImages,
-      imageCount: noteData.imageUrls?.length || 0
+      imageCount: noteData.imageUrls?.length || 0,
+      hasUrgentItems,
+      projectContext
     };
     
     // Generate email content
@@ -556,6 +564,8 @@ export const generateEmail = actionWithUser({
           - Be clear about expectations
           - Format the body with clear sections and bullet points where appropriate
           - Include key action items from the report
+          - If there are urgent items, highlight them as "URGENT ACTION REQUIRED:" at the top of the email
+          - Include relevant deadlines and timeline expectations when available
           - Close with a professional sign-off followed by the sender's name
           
           # TONE AND STYLE
@@ -563,36 +573,66 @@ export const generateEmail = actionWithUser({
           - Be direct but professional - this is a communication, not a confrontation
           - Clearly communicate responsibility for addressing the issues when applicable
           - Keep the email concise and to the point
+          - Prioritize information based on importance and urgency
+          - For urgent safety or compliance issues, use stronger language to convey importance
           
           # FOR DIFFERENT REPORT TYPES
-          - SAFETY: Emphasize importance of safety requirements and compliance
-          - QUALITY: Reference contract specifications and quality standards
-          - EQUIPMENT: Note operational impacts and timeline considerations
-          - RFI: Communicate need for timely information
-          - GENERAL: Focus on schedule and project progress
+          - SAFETY: 
+            * Emphasize importance of safety requirements and compliance
+            * Reference specific safety regulations or standards where applicable
+            * For incidents, clearly state required follow-up documentation
+            * Highlight resolution timeframes for hazards
+          
+          - QUALITY: 
+            * Reference contract specifications and quality standards
+            * Include specific measurements or tolerances when available
+            * Mention any quality control verification steps needed
+            * Specify if rework is required and associated timelines
+          
+          - EQUIPMENT: 
+            * Note operational impacts and timeline considerations
+            * Include equipment identification codes/numbers when available
+            * Specify maintenance requirements and service schedules
+            * Note any alternative equipment arrangements if applicable
+          
+          - RFI: 
+            * Communicate need for timely information
+            * Precisely state what information is needed
+            * Include any project milestone implications
+            * Reference specific drawing numbers, specification sections, or contract clauses
+          
+          - GENERAL: 
+            * Focus on schedule and project progress
+            * Highlight any schedule variances or recovery plans
+            * Include coordination needs with other trades
+            * Note any weather or site condition impacts
           
           # ACCOUNTABILITY LANGUAGE
           - Only include accountability statements when directly relevant to the issue
           - For serious safety or quality issues, include appropriate language about responsibility
           - For general updates or RFIs, focus on collaborative problem-solving instead
           - Avoid excessive formality or threatening language
+          - Reference specific contractual obligations when relevant
+          - Include statements about documentation requirements for compliance issues
           
           # FORMATTING RULES
           - Format the email for clarity with appropriate spacing
           - Action items should be listed as bullet points with clear deadlines when possible
+          - For complex projects, group information into logical sections with clear headings
           - Keep paragraphs short and scannable
+          - Use bold formatting for critical deadlines or safety issues
           
           # IMAGE HANDLING
           - If the report includes images, mention this fact in the email
           - Refer to images as "attached photos" if includeAttachments is true
           - Indicate the number of images if there are multiple
           - Use wording like "As shown in the site photos," or "The images document the following issues:"
-          - Make intelligent assumptions about what the images likely show based on the report type and content:
-            * For SAFETY reports: Assume images show safety hazards, PPE compliance issues, or incident areas
-            * For QUALITY reports: Assume images show non-conformance issues, quality control points, or work requiring correction
-            * For EQUIPMENT reports: Assume images show equipment conditions, mechanical issues, or operational states
-            * For RFI reports: Assume images show areas requiring clarification or design interpretation
-            * For GENERAL reports: Assume images show general site conditions or work progress
+          - Describe what the images show based on the report type:
+            * For SAFETY reports: Describe safety hazards, PPE compliance issues, or incident areas
+            * For QUALITY reports: Describe non-conformance issues, quality control points, or work requiring correction
+            * For EQUIPMENT reports: Describe equipment conditions, mechanical issues, or operational states
+            * For RFI reports: Describe areas requiring clarification or design interpretation
+            * For GENERAL reports: Describe general site conditions or work progress
           - Write as if the images provide clear visual evidence supporting the points in your email
           
           # RESPONSE FORMAT
@@ -615,6 +655,63 @@ export const generateEmail = actionWithUser({
     return response.choices[0]?.message?.content || 'Failed to generate email content';
   }
 });
+
+// Helper functions for the enhanced email generation
+
+// Determine if there are urgent items that need to be highlighted
+function determineUrgency(noteData: any, actionItems: any[]): boolean {
+  // Check report type - safety issues are often urgent
+  if (noteData.reportType === 'SAFETY') {
+    // Check for urgent safety incidents or hazards
+    if (noteData.safetyDetails?.incidents?.length > 0) {
+      return true;
+    } else if (noteData.safetyDetails?.hazards?.length > 0) {
+      return true;
+    }
+  }
+  
+  // Check for equipment issues that might halt work
+  if (noteData.reportType === 'EQUIPMENT' && 
+      noteData.equipmentDetails?.mechanicalIssues?.length > 0) {
+    return true;
+  }
+  
+  // Check action items for urgent keywords
+  const deadlineKeywords = ['urgent', 'immediately', 'asap', 'today', 'emergency', 'critical', 'deadline'];
+  if (actionItems.some(item => 
+    typeof item === 'string' && 
+    deadlineKeywords.some(keyword => item.toLowerCase().includes(keyword)))) {
+    return true;
+  }
+  
+  return false;
+}
+
+// Generate project context to provide more relevant email content
+function generateProjectContext(noteData: any): string {
+  let context = '';
+  
+  // Add report-specific context
+  switch (noteData.reportType) {
+    case 'SAFETY':
+      context = 'This safety communication requires prompt attention and appropriate follow-up actions to maintain site compliance and worker safety.';
+      break;
+    case 'QUALITY':
+      context = 'Quality standards must be maintained as per contract specifications. Timely remediation of any issues identified is essential.';
+      break;
+    case 'EQUIPMENT':
+      context = 'Equipment functionality directly impacts project timeline and operational efficiency. Please address any equipment issues promptly.';
+      break;
+    case 'RFI':
+      context = 'Timely responses to these information requests will prevent project delays and ensure proper execution of work.';
+      break;
+    case 'GENERAL':
+      context = 'This update includes important project information that requires your attention and appropriate action.';
+      break;
+  }
+  
+  return context;
+}
 
 export type SearchResult = {
   id: string;
